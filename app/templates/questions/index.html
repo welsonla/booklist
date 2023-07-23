@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <span class="title">
+    <h1>{% block title %} Questions {% endblock %}</h1>
+    </span>
+    <div class="questions">
+        <h2>Questions Blueprint</h2>
+        <div class="new-question">
+            <form  method="POST">
+                <p>
+                    <textarea name="content" id="q-content" cols="30" rows="3" placeholder="write your question"></textarea>
+                </p>
+                <textarea name="answer" id="q-answer" cols="30" rows="3" placeholder="Answer?"></textarea>
+                <p><input type="submit"></p>
+            </form>
+        </div>
+        <div class="questions-list">
+            {% for question in questions %}
+                <div class="question">
+                    <h4>{{ question.content }}</h4>
+                    <p>{{ question.answer }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}
