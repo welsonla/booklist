@@ -2,7 +2,8 @@ from app.extensions import db
 from datetime import datetime
 from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash, check_password_hash
-class User(db.Model):
+from flask_login import UserMixin
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer,primary_key=True)
     name = db.Column(db.String(50), comment="用户名, 登录用的")
     nickname = db.Column(db.String(50), nullable=True, comment="昵称")
@@ -10,7 +11,7 @@ class User(db.Model):
     password_hash = db.Column(db.String(128), nullable=False, comment="密码,加密后的")
     email = db.Column(db.String(50), comment="邮箱")
     role = db.Column(db.Integer, comment="用户角色")
-    state=db.Column(db.Integer, default=0, comment="0:正常，1:冻结")
+    state = db.Column(db.Integer, default=0, comment="0:正常，1:冻结")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow)
 
