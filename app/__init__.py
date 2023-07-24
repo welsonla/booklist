@@ -7,6 +7,7 @@ from app.posts import bp as post_bp
 from app.questions import bp as question_bp
 from app.extensions import db
 
+
 def create_app(config_class=Config):
     app = Flask(__name__, template_folder="templates", instance_relative_config=True)
     app.config.from_object(config_class)
@@ -21,9 +22,5 @@ def create_app(config_class=Config):
     @app.route('/index', methods=['GET'])
     def index():
         return render_template('hello.html')
-
-    @app.route('/test/')
-    def test_page():
-        return  "<h1>Testing  the Flask Application Factory Pattern</h1>"
 
     return app
