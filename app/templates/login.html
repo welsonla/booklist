@@ -12,6 +12,13 @@
             <div class="login-item">
                 <h1>晓书馆-后台管理系统</h1>
             </div>
+            {% with messages = get_flashed_messages() %}
+                {% for message in messages %}
+                    <div class="flash">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {%  endwith %}
             <div class="login-item">
                  <label for="username">用户名</label>
                  <input type="text" name="username" id="username" autocomplete="off" required>

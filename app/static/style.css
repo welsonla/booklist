@@ -1,6 +1,6 @@
 html {
     font-family: sans-serif;
-    background: #eee;
+    background: #f2f2f5;
     padding: 1rem;
 }
 
@@ -53,4 +53,13 @@ html {
     color: #FFFFFF;
     font-size: 16px;
     height: 44px;
+}
+
+.flash {
+    background-color: #ffecec;
+    color: #1C1C1C;
+    border-radius: 3px;
+    font-size: 14px;
+    padding: 10px;
+    box-sizing: border-box;
 }

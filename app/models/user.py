@@ -17,17 +17,21 @@ class User(db.Model, UserMixin):
 
     def encode_password(self, password):
         """将密码进行散列加密"""
-        self.password_hash = generate_password_hash(password)
+        pwd = self.password_hash = generate_password_hash(password)
+        print("加密后的密码")
+        return pwd
 
     def valid_password(self, password):
         """检查密码"""
-        return check_password_hash(self.password_hash, password)
+        rslt = check_password_hash(self.password_hash, password)
+        print("密码不正确")
+        return rslt
 
 
 class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name=db.Column(db.String(50), comment="角色名称")
-    level=db.Column(db.Integer, comment="角色Id")
+    name = db.Column(db.String(50), comment="角色名称")
+    level = db.Column(db.Integer, comment="角色Id")
     created_at = db.Column(db.DateTime(timezone=True),server_default=func.now())
     updated_at = db.Column(db.DateTime(timezone=True),server_default=func.now())
 

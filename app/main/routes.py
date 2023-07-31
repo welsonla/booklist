@@ -23,15 +23,19 @@ def login():
 
         if not username or not password:
             flash('请输入正确的用户名和密码')
-            return redirect(url_for('login'))
+            print("请输入正确的用户名和密码")
+            return redirect(url_for('main.login'))
 
         user = User.query.filter_by(name=username).first()
+        print(f"user:{user.name}")
         if username == user.name and user.valid_password(password):
             login_user(user)
             flash('登录成功')
-            return redirect('dashboard')
+            print("登录成功")
+            return redirect(url_for('admin.index'))
         flash('用户名或密码错误')
-        return redirect(url_for('login'))
+        print("用户名或密码错误")
+        return redirect(url_for('main.login'))
     else:
         # GET 方法直接返回模板页面
         return render_template('login.html')
