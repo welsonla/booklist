@@ -4,6 +4,17 @@ html,body{
     padding: 0;
     color: #1C1C1C;
 }
+
+a{
+    color: #3377aa;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+    text-decoration-color: #3377aa;
+}
+
 .wrap {
     display: flex;
     flex-direction: column;
@@ -18,6 +29,12 @@ html,body{
     justify-content: space-between;
     padding: 20px;
     box-sizing: border-box;
+    border-bottom: 1px solid #ddd;
+}
+
+.header h2 {
+    color: black;
+    font-weight: normal;
 }
 
 .header .user {
