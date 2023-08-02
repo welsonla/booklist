@@ -10,7 +10,7 @@ user_cli = AppGroup("user")
 def create_user(name):
     print(f"name:{name}")
 
-@user_cli.command("admin")
+@user_cli.command("dashboard")
 @click.option('--username', prompt=True, help='The username used to login.')
 @click.option('--password', prompt=True, hide_input=True, confirmation_prompt=True, help='The password used to login.')
 def admin(username, password):

@@ -1,0 +1,16 @@
+<nav>
+{#    {% block main_menu %}#}
+{#    <ul>#}
+{#        <li><a href="">用户管理</a></li>#}
+{#        <li><a href="">图书管理</a></li>#}
+{#        <li><a href="">书单管理</a></li>#}
+{#        <li><a href="">笔记管理</a></li>#}
+{#    </ul>#}
+{#    {% endblock %}#}
+
+      <!-- 左侧导航栏 -->
+     <ul class="nav nav-pills nav-stacked">
+        {{ layout.menu() }}
+        {{ layout.menu_links() }}
+     </ul>
+</nav>

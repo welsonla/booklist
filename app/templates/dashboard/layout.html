@@ -1,0 +1,36 @@
+{% extends 'admin/base.html' %}
+{% block head_tail %}
+  {{ super() }}
+{#    <link href="{{ url_for('static', filename='layout.css') }}" rel="stylesheet">#}
+
+{% endblock %}
+ <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+<div class="wrap">
+{% block page_body %}
+    <header class="header">
+        {% block brand %}
+            <h2 id="brand">{{ admin_view.name|capitalize }}</h2>
+          <div class="clearfix"></div>
+        {% endblock %}
+
+        {% include 'dashboard/head.html' %}
+    </header>
+    <div class="content">
+        <aside class="sidebar">
+            {% include 'dashboard/left.html' %}
+
+        </aside>
+        <main class="main">
+        {{ layout.messages() }}
+            {% block body %}{% endblock %}
+        </main>
+    </div>
+    <footer>
+        晓书单 &copy; 2023
+    </footer>
+{% endblock %}
+</div>
+    <!-- 原始的Flask-Admin JavaScript文件 -->
+    {{ admin_js }}
+</body>
+</html>

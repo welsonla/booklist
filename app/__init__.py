@@ -12,10 +12,11 @@ from app.commands import user_cli
 from flask.cli import cli
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from app.admin import BaseModelView
-from app.admin.model_view.user_view import UserView
-from app.admin.model_view.book_view import BookView
-from app.admin.model_view.dashboard_view import DashboardView
+from app.dashboard import BaseModelView
+from app.dashboard.model_view.user_view import UserView
+from app.dashboard.model_view.book_view import BookView
+from app.dashboard.model_view.dashboard_view import DashboardView
+from app.dashboard.model_view.admin_view import AdminView
 from flask_admin.contrib.fileadmin import FileAdmin
 import os.path as op
 def create_app(config_class=Config):
@@ -33,11 +34,16 @@ def create_app(config_class=Config):
 
     # AdminLTE
     app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
+    app.config['BABEL_DEFAULT_LOCALE'] = 'zh_CN'
 
-    admin = Admin(app, name='booklist', template_mode='bootstrap4')
+    admin = Admin(app, name='Dashboard', template_mode='bootstrap3', base_template='dashboard/layout.html') # index_view=DashboardView(name='Dashboard', url='/dashboard', endpoint='admin')
     admin.add_view(UserView(User, db.session, category='User'))
     admin.add_view(BookView(Book, db.session, category='Book'))
     admin.add_view(DashboardView(name='Dashboard', endpoint='dashboard'))
+
+    admin.add_view(DashboardView(name='Hello 1', endpoint='test1', category='Test'))
+    admin.add_view(DashboardView(name='Hello 2', endpoint='test2', category='Test'))
+    admin.add_view(DashboardView(name='Hello 3', endpoint='test3', category='Test'))
 
     # AdminLTE fileupload
     path = op.join(op.dirname(__file__), 'static')
