@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+    <title>{% block title %} {% endblock %} -- 后台管理系统</title>
+</head>
+<body>
+<div class="wrap">
+    <header class="header">
+        {% include 'admin/head.html' %}
+    </header>
+    <div class="content">
+        <aside class="sidebar">
+            {% include 'admin/left.html' %}
+        </aside>
+        <main class="main">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    <footer>
+        晓书单 &copy; 2023
+    </footer>
+</div>
+
+</body>
+</html>
