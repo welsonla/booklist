@@ -37,8 +37,8 @@ def create_app(config_class=Config):
     app.config['BABEL_DEFAULT_LOCALE'] = 'zh_CN'
 
     admin = Admin(app, name='Dashboard', template_mode='bootstrap4', base_template='dashboard/layout.html') # index_view=DashboardView(name='Dashboard', url='/dashboard', endpoint='admin')
-    admin.add_view(UserView(User, db.session, category='User'))
-    admin.add_view(BookView(Book, db.session, category='Book'))
+    admin.add_view(UserView(User, db.session))
+    admin.add_view(BookView(Book, db.session))
     admin.add_view(DashboardView(name='Dashboard', endpoint='dashboard'))
 
     admin.add_view(DashboardView(name='Hello 1', endpoint='test1', category='Test'))

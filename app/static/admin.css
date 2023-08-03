@@ -78,15 +78,20 @@ table .list-buttons-column .icon {
 .sidebar {
     background-color: #f6f6f1;
     width: 200px;
-    float: left;
 }
 
-.sidebar ul {
-    list-style: none;
+.sidebar .nav {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+}
+
+.sidebar .nav ul {
+    /*list-style: decimal;*/
     color: #111;
 }
 
-.sidebar ul li {
+.sidebar .nav ul li {
     display: block;
     height: 30px;
 }
@@ -94,7 +99,6 @@ table .list-buttons-column .icon {
 .main {
     display: flex;
     flex: 1;
-    float: left;
     flex-direction: column;
     margin-left: 10px;
     padding: 25px;
