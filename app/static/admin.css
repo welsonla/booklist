@@ -55,6 +55,26 @@ a:hover {
     /*margin-top: 10px;*/
 }
 
+.table-responsive {
+    color: #3E4349;
+}
+
+.table-responsive table tr td {
+    vertical-align: middle;
+}
+
+table .list-buttons-column {
+    text-align: center;
+}
+
+table .list-buttons-column .icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
 .sidebar {
     background-color: #f6f6f1;
     width: 200px;
@@ -75,7 +95,10 @@ a:hover {
     display: flex;
     flex: 1;
     float: left;
+    flex-direction: column;
     margin-left: 10px;
+    padding: 25px;
+    box-sizing: border-box;
 }
 
 footer {

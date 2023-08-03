@@ -36,7 +36,7 @@ def create_app(config_class=Config):
     app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
     app.config['BABEL_DEFAULT_LOCALE'] = 'zh_CN'
 
-    admin = Admin(app, name='Dashboard', template_mode='bootstrap3', base_template='dashboard/layout.html') # index_view=DashboardView(name='Dashboard', url='/dashboard', endpoint='admin')
+    admin = Admin(app, name='Dashboard', template_mode='bootstrap4', base_template='dashboard/layout.html') # index_view=DashboardView(name='Dashboard', url='/dashboard', endpoint='admin')
     admin.add_view(UserView(User, db.session, category='User'))
     admin.add_view(BookView(Book, db.session, category='Book'))
     admin.add_view(DashboardView(name='Dashboard', endpoint='dashboard'))

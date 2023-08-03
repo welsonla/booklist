@@ -2,26 +2,30 @@
 {% block head_tail %}
   {{ super() }}
 {#    <link href="{{ url_for('static', filename='layout.css') }}" rel="stylesheet">#}
-
-{% endblock %}
  <link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}">
+{% endblock %}
+
 <div class="wrap">
 {% block page_body %}
     <header class="header">
         {% block brand %}
-            <h2 id="brand">{{ admin_view.name|capitalize }}</h2>
-          <div class="clearfix"></div>
+            {% include 'dashboard/head.html' %}
+{#            {% include 'dashboard/head.html' %}#}
+            <div><h2>晓书单后台管理系统</h2></div>
+            <div class="user">
+                <a href="">welsonla</a>
+                <a href="">logout</a>
+            </div>
+{#            <h2 id="brand">{{ admin_view.name|capitalize }}</h2>#}
+{#          <div class="clearfix"></div>#}
         {% endblock %}
-
-        {% include 'dashboard/head.html' %}
     </header>
     <div class="content">
         <aside class="sidebar">
             {% include 'dashboard/left.html' %}
-
         </aside>
         <main class="main">
-        {{ layout.messages() }}
+            {{ layout.messages() }}
             {% block body %}{% endblock %}
         </main>
     </div>

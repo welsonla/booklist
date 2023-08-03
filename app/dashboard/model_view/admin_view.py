@@ -3,6 +3,12 @@ from flask import session, redirect, url_for, request
 from flask_login import login_manager
 
 class AdminView(ModelView):
+
+    edit_template = 'admin/edit.html'
+    list_template = 'admin/list.html'
+    create_template = 'admin/create.html'
+
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.static_folder = 'static'
