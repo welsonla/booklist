@@ -2,7 +2,9 @@ from app.extensions import db
 # from flask_sqlalchemy import Column,String,Integer,Text,Float,DateTime
 import datetime
 
+
 class Book(db.Model):
+    """图书表"""
     __tablename__='book'
 
     id = db.Column(db.Integer, primary_key=True)

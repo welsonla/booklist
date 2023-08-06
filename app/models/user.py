@@ -3,8 +3,11 @@ from datetime import datetime
 from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+
+
 class User(db.Model, UserMixin):
-    id = db.Column(db.Integer,primary_key=True)
+    """用户表"""
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), comment="用户名, 登录用的")
     nickname = db.Column(db.String(50), nullable=True, comment="昵称")
     bio = db.Column(db.Text, nullable=True, comment="签名")
@@ -29,9 +32,9 @@ class User(db.Model, UserMixin):
 
 
 class Role(db.Model):
+    """用户角色表"""
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), comment="角色名称")
     level = db.Column(db.Integer, comment="角色Id")
-    created_at = db.Column(db.DateTime(timezone=True),server_default=func.now())
-    updated_at = db.Column(db.DateTime(timezone=True),server_default=func.now())
-
+    created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
