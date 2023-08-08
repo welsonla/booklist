@@ -4,14 +4,13 @@ from config import Config
 from app.main import bp as main_bp
 from app.posts import bp as post_bp
 from app.questions import bp as question_bp
+from app.api import bp as api_bp
 from app.extensions import db
 from app.models.user import User
 from app.models.book import Book
 from flask_login import LoginManager
 from app.commands import user_cli
-from flask.cli import cli
 from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
 from app.dashboard import BaseModelView
 from app.dashboard.model_view.user_view import UserView
 from app.dashboard.model_view.book_view import BookView
@@ -51,6 +50,7 @@ def create_app(config_class=Config):
 
     # 注册Main Blueprint
     app.register_blueprint(main_bp)
+    app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(post_bp, url_prefix='/posts')
     app.register_blueprint(question_bp, url_prefix='/questions')
 

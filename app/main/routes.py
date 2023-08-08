@@ -8,7 +8,7 @@ def index():
     return render_template("index.html")
 
 
-@bp.route('/login', methods=('GET','POST'))
+@bp.route('/login', methods=['GET', 'POST'])
 def login():
     # # 插入admin用户
     # user = User(name='welsonla', email='wanyc@outlook', bio='Done is better then perfect.')

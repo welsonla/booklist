@@ -12,4 +12,4 @@ class Note(db.Model):
     book_id = db.Column(db.Integer, db.ForeignKey('book.id'), comment='书籍id')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), comment='用户Id')
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, comment='创建时间')
-    updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, comment='更新时间')
+    updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow, onupdate=datetime.utcnow, comment='更新时间')
