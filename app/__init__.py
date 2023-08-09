@@ -1,4 +1,5 @@
 import os
+import os.path as op
 from flask import Flask, render_template
 from config import Config
 from app.main import bp as main_bp
@@ -17,12 +18,17 @@ from app.dashboard.model_view.book_view import BookView
 from app.dashboard.model_view.dashboard_view import DashboardView
 from app.dashboard.model_view.admin_view import AdminView
 from flask_admin.contrib.fileadmin import FileAdmin
-import os.path as op
+from flask_cors import CORS
+
+
 def create_app(config_class=Config):
     app = Flask(__name__, template_folder="templates", instance_relative_config=True)
     app.config.from_object(config_class)
 
     login_manager = LoginManager(app)
+
+    # 配置支持跨域
+    CORS(app)
 
     # 实例化拓展
     # login_manager.init_app(app)
