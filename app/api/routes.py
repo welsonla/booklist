@@ -1,9 +1,10 @@
 from app.api import bp
 from flask import Flask, jsonify, request
 from app.extensions import db
-from app.models.user import User
-from app.extensions import result
-
+from app.models.user import User, UserSchema
+from app.models.access_token import AccessToken
+from app.extensions import result, sqlalchemy_to_json
+import uuid
 
 @bp.route('/login', methods=['POST'])
 def login():
@@ -13,12 +14,20 @@ def login():
     u = User.query.filter_by(name=username).first()
     if u != None:
         if u.valid_password(password):
-            return "登录成功"
+            access_token = AccessToken()
+            access_token.userid = u.id
+            access_token.token = str(uuid.uuid4())
+            db.session.add(access_token)
+            db.session.commit()
+
+            schema = UserSchema()
+            dict = schema.dump(u)
+            return result(1000, "登录成功", dict)
         else:
-            return f"密码验证失败:{u.password_hash} ----- {u.encode_password(password)} ---- {password}"
+            return result(1002, "密码验证失败")
     else:
-        return "用户不存在"
-    return "登录失败"
+        return result(1003, "用户不存在")
+    return result(1004, "登录失败")
 
 @bp.route("/register", methods=["POST"])
 def register():
