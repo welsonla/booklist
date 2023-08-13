@@ -1,7 +1,7 @@
 from app.extensions import db
 # from flask_sqlalchemy import Column,String,Integer,Text,Float,DateTime
 import datetime
-
+from marshmallow import Schema, fields
 
 class Book(db.Model):
     """图书表"""
@@ -23,3 +23,22 @@ class Book(db.Model):
     category = db.Column(db.String(255), nullable=True, comment="图书种类")
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+
+class BookSchema(Schema):
+    id = fields.Int(dump_only=True)
+    name = fields.Str()
+    cover_url = fields.Str()
+    author = fields.Str()
+    price = fields.Float()
+    desc = fields.Str()
+    isbn = fields.Str()
+    rating = fields.Float()
+    rating_count = fields.Int()
+    pages = fields.Int()
+    publisher = fields.Str()
+    publish_date = fields.Str()
+    douban_url = fields.Str()
+    category = fields.Str()
+    created_at = fields.DateTime()
+    updated_at = fields.DateTime()

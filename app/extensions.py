@@ -7,9 +7,9 @@ db = SQLAlchemy()
 
 
 def result(code=1000, message="", result=None):
-    dictionary = {"code": code, "message": message, "result": result}
+    dictionary = {"returncode": code, "message": message, "result": result}
     json_data = jsonify(dictionary)
-    print(f"{json_data}")
+    print(f"json.output:{json_data}")
     return json_data
 
 
