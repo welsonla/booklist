@@ -11,6 +11,7 @@ import uuid
 
 @bp.route('/login', methods=['POST'])
 def login():
+    """用户登录"""
     params = request.get_json()
     username = params["username"]
     password = params['password']
@@ -39,6 +40,7 @@ def login():
 
 @bp.route("/register", methods=["POST"])
 def register():
+    """用户注册"""
     params = request.get_json()
     # print("data")
     username = params["username"]
@@ -59,6 +61,7 @@ def register():
 
 @bp.route('/home', methods=["post"])
 def home():
+    """获取首页数据"""
     hotbooks = Book.query.order_by(Book.rating.desc()).limit(5).all()
     bookSchema = BookSchema(many=True)
     bookDict = bookSchema.dump(hotbooks)
@@ -68,25 +71,43 @@ def home():
     notes = Note.query.order_by(Note.like_count.desc()).limit(5).all()
     noteSchema = NoteSchema(many=True)
     noteDict = noteSchema.dump(notes)
-
     print(f"notelist.count:{len(notes)}")
+
+    categories = db.session.query(Book.category, db.func.count(Book.category)).group_by(Book.category).all()
+    categorieDict = []
+    print(categories)
+    for (category, count) in categories:
+        print(f"{category}----{count}")
+        categorieDict.append({'title': category, 'count': count})
+    print(categorieDict)
 
     params = {
         "hotbooks": bookDict,
         "booklist": [],
         "notelist": noteDict,
-        "categories": []
+        "categories": categorieDict
     }
     return result(1000, '', params)
 
 
+@bp.route('/book/<int:id>', methods=['Post'])
+def book(id):
+    """获取图书详情"""
+    book = Book.query.get(id)
+    bookSchema = BookSchema()
+    bookDict = bookSchema.dump(book)
+    print(f"book.dict:{bookDict}")
+    return result(1000, '', bookDict)
+
+
+@bp.route('/book/quote/create', methods=['POST'])
+def quote_create():
+    return result(1000, '', {})
+
+
 @bp.route('/logout', methods=['POST'])
 def logout():
-    return ""
-
-
-@bp.route('/book/<int:id>', methods=['GET', 'POST'])
-def book(id):
+    """退出登录，清理本地用户信息"""
     return ""
 
 
