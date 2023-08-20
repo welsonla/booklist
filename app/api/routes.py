@@ -75,18 +75,18 @@ def home():
     print(f"notelist.count:{len(notes)}")
 
     categories = db.session.query(Book.category, db.func.count(Book.category)).group_by(Book.category).all()
-    categorieDict = []
+    categorie_dict = []
     print(categories)
     for (category, count) in categories:
         print(f"{category}----{count}")
-        categorieDict.append({'title': category, 'count': count})
-    print(categorieDict)
+        categorie_dict.append({'title': category, 'count': count})
+    print(categorie_dict)
 
     params = {
         "hotbooks": bookDict,
         "booklist": [],
         "notelist": noteDict,
-        "categories": categorieDict
+        "categories": categorie_dict
     }
     return result(1000, '', params)
 
@@ -95,9 +95,18 @@ def home():
 def book(id):
     """获取图书详情"""
     book = Book.query.get(id)
-    bookSchema = BookSchema()
+    bookSchema = BookSchema(many=False)
     bookDict = bookSchema.dump(book)
+
+    # 查询关联笔记
+    quotes = Quote.query.filter_by(book_id=book.id).limit(3).offset(0).all()
+    quoteShema = QuoteShema(many=True)
+    quoteDict = quoteShema.dump(quotes)
+    bookDict["quotes"] = quoteDict
+
+    print(f"quotes.count:{len(quotes)}")
     print(f"book.dict:{bookDict}")
+    print(f"book.notes:{book.quotes}")
     return result(1000, '', bookDict)
 
 
@@ -140,13 +149,10 @@ def quote_create():
 @bp.route('/book/quote/<int:id>', methods=['POST'])
 def quote_detail(id):
     quote = Quote.query.get(id)
-    print(quote.user.name)
-    print(quote.comment)
     quoteSchema = QuoteShema()
     dict = quoteSchema.dump(quote)
-    print(f"quote.user.name:{quote.user.name}")
-    print(f"note.detail:{dict}")
     return result(1000, '', dict)
+
 
 @bp.route('/logout', methods=['POST'])
 def logout():

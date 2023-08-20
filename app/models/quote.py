@@ -17,8 +17,8 @@ class Quote(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     #  关联User
-    user = db.relationship('User')
-    book = db.relationship('Book')
+    # user = db.relationship('User')
+    # book = db.relationship('Book', backref=db.backref("quotes", lazy='select')) # backref=db.backref("quotes", lazy="dynamic")
 
 class QuoteShema(Schema):
     id = fields.Int()
@@ -32,5 +32,5 @@ class QuoteShema(Schema):
     create_at = fields.DateTime()
     update_at = fields.DateTime()
     # 过滤字段
-    user = fields.Nested(UserSchema, only=("id","name","nickname","state",))
-    book = fields.Nested(BookSchema)
+    user = fields.Nested(UserSchema, only=("id", "name", "nickname", "state",))
+    book = fields.Nested(BookSchema, only=("id", "name", "cover_url", "author"))

@@ -21,7 +21,7 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    quotes = db.relationship('Quote')
+    quotes = db.relationship('Quote', backref='user')
 
     def encode_password(self, password):
         """将密码进行散列加密"""

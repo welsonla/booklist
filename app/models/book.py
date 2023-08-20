@@ -2,6 +2,7 @@ from app.extensions import db
 # from flask_sqlalchemy import Column,String,Integer,Text,Float,DateTime
 import datetime
 from marshmallow import Schema, fields
+# from app.models.quote import QuoteShema
 
 class Book(db.Model):
     """图书表"""
@@ -24,7 +25,9 @@ class Book(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
-    quotes = db.relationship('Quote')
+    quotes = db.relationship('Quote', backref='book', lazy=True)
+
+    # comments = db.relationship("Comment")
 
 
 class BookSchema(Schema):
@@ -44,3 +47,5 @@ class BookSchema(Schema):
     category = fields.Str()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
+
+    # quotes = fields.Nested(QuoteShema, many=True)
