@@ -24,6 +24,8 @@ class Book(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
+    quotes = db.relationship('Quote')
+
 
 class BookSchema(Schema):
     id = fields.Int(dump_only=True)

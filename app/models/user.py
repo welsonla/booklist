@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from marshmallow import Schema, fields
 
+
 class User(db.Model, UserMixin):
     """用户表"""
     __excluede__ = ['password_hash']
@@ -20,6 +21,7 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    quotes = db.relationship('Quote')
 
     def encode_password(self, password):
         """将密码进行散列加密"""

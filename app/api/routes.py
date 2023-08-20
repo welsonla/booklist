@@ -6,6 +6,7 @@ from app.models.access_token import AccessToken
 from app.extensions import result, sqlalchemy_to_json
 from app.models.book import Book, BookSchema
 from app.models.note import Note, NoteSchema
+from app.models.quote import Quote, QuoteShema
 import uuid
 
 
@@ -102,8 +103,50 @@ def book(id):
 
 @bp.route('/book/quote/create', methods=['POST'])
 def quote_create():
-    return result(1000, '', {})
+    """发表摘抄与评论"""
+    # 获取登录用户的cookie标识
+    sign = request.headers.get('sign')
+    print(f"sign:{sign}")
+    print(f"headers:{request.headers}")
+    # 查找登录用户信息
+    token = AccessToken.query.filter_by(token=sign).first()
+    if token is not None:
+        params = request.get_json()
+        book_id  = params["bookid"]
+        chapter = params["chapter"]
+        page = params["page"] or 0
+        content = params["content"]
+        comment = params["comment"] or ""
 
+        quote = Quote()
+        quote.book_id = book_id
+        quote.chapter = chapter
+        quote.page = page
+        quote.content = content
+        quote.comment = comment
+        quote.user_id = token.userid
+        db.session.add(quote)
+        db.session.commit()
+
+        quoteSchema = QuoteShema()
+        dict = quoteSchema.dump(quote)
+        print(f"发表成功:{dict}")
+        return result(1000, '', dict)
+    else:
+        print("未找到用户")
+        return result(1003, '用户未登录')
+
+
+@bp.route('/book/quote/<int:id>', methods=['POST'])
+def quote_detail(id):
+    quote = Quote.query.get(id)
+    print(quote.user.name)
+    print(quote.comment)
+    quoteSchema = QuoteShema()
+    dict = quoteSchema.dump(quote)
+    print(f"quote.user.name:{quote.user.name}")
+    print(f"note.detail:{dict}")
+    return result(1000, '', dict)
 
 @bp.route('/logout', methods=['POST'])
 def logout():
