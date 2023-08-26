@@ -1,12 +1,14 @@
 from app.api import bp
 from flask import Flask, jsonify, request
 from app.extensions import db
-from app.models.user import User, UserSchema
 from app.models.access_token import AccessToken
-from app.extensions import result, sqlalchemy_to_json
+from app.models.user import User, UserSchema
+from app.extensions import result
 from app.models.book import Book, BookSchema
 from app.models.note import Note, NoteSchema
 from app.models.quote import Quote, QuoteShema
+from app.models.review import Review, ReviewShema
+
 import uuid
 
 
@@ -104,6 +106,12 @@ def book(id):
     quoteDict = quoteShema.dump(quotes)
     bookDict["quotes"] = quoteDict
 
+    ### 查询书评
+    reviews = Review.query.filter_by(book_id=book.id).limit(3).offset(0).all()
+    revieShema = ReviewShema(many=True)
+    reviewDict = revieShema.dump(reviews)
+    bookDict["reviews"] = reviewDict
+
     print(f"quotes.count:{len(quotes)}")
     print(f"book.dict:{bookDict}")
     print(f"book.notes:{book.quotes}")
@@ -146,12 +154,50 @@ def quote_create():
         return result(1003, '用户未登录')
 
 
+@bp.route('/user/<int:id>', methods=('POST',))
+def user(id):
+    user = User.query.get(id)
+    userShema = UserSchema()
+    dict = userShema.dump(user)
+
+    notes = Quote.query.filter_by(user_id=id).limit(5).all()
+    noteShema = QuoteShema(many=True)
+    noteArray = noteShema.dump(notes)
+
+    dict["notes"] = noteArray
+    return result(1000, '', dict)
+
 @bp.route('/book/quote/<int:id>', methods=['POST'])
 def quote_detail(id):
     quote = Quote.query.get(id)
     quoteSchema = QuoteShema()
     dict = quoteSchema.dump(quote)
     return result(1000, '', dict)
+
+
+@bp.route('/book/review/create', methods=['POST'])
+def review_ceate():
+    """创建书评"""
+    jsonBody = request.get_json()
+    reviewShema = ReviewShema()
+    data = reviewShema.load(jsonBody, many=False)
+    data.author_id = 1
+    db.session.add(data)
+    db.session.commit()
+    print(f"review.data:{data}")
+    dict = reviewShema.dump(data)
+    print(f"review:{dict}")
+    return result(1000, '', dict )
+
+
+@bp.route('/book/review/<int:id>',methods=["POST"])
+def review_detail(id):
+    """获取书评"""
+    review = Review.query.get(id)
+    reviewShema = ReviewShema()
+    dict = reviewShema.dump(review)
+    return result(1000, '', dict)
+
 
 
 @bp.route('/logout', methods=['POST'])

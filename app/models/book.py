@@ -26,7 +26,7 @@ class Book(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     quotes = db.relationship('Quote', backref='book', lazy=True)
-
+    reviews = db.relationship('Review', back_populates='book')
     # comments = db.relationship("Comment")
 
 

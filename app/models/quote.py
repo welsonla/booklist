@@ -32,5 +32,5 @@ class QuoteShema(Schema):
     create_at = fields.DateTime()
     update_at = fields.DateTime()
     # 过滤字段
-    user = fields.Nested(UserSchema, only=("id", "name", "nickname", "state",))
+    user = fields.Nested(UserSchema, only=("id", "name", "nickname", "state"))
     book = fields.Nested(BookSchema, only=("id", "name", "cover_url", "author"))

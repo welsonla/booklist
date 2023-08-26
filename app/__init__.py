@@ -19,6 +19,7 @@ from app.dashboard.model_view.dashboard_view import DashboardView
 from app.dashboard.model_view.admin_view import AdminView
 from flask_admin.contrib.fileadmin import FileAdmin
 from flask_cors import CORS
+from flask_migrate import Migrate
 
 
 def create_app(config_class=Config):
@@ -36,6 +37,8 @@ def create_app(config_class=Config):
 
     # 注册数据库管理类
     db.init_app(app)
+
+    migrate = Migrate(app, db)
 
     # AdminLTE
     app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
