@@ -68,26 +68,26 @@ def home():
     hotbooks = Book.query.order_by(Book.rating.desc()).limit(5).all()
     bookSchema = BookSchema(many=True)
     bookDict = bookSchema.dump(hotbooks)
-    print(f"hotbooks.count{len(hotbooks)}")
-    print(f"hotbooks:{dict}")
 
-    notes = Note.query.order_by(Note.like_count.desc()).limit(5).all()
+    notes = Note.query.order_by(Note.id.desc()).limit(5).offset(0).all()
     noteSchema = NoteSchema(many=True)
     noteDict = noteSchema.dump(notes)
-    print(f"notelist.count:{len(notes)}")
+
+    reviews = Review.query.order_by(Review.id.desc()).limit(5).offset(0).all()
+    reviewShema = ReviewShema(many=True)
+    reviewDict = reviewShema.dump(reviews)
 
     categories = db.session.query(Book.category, db.func.count(Book.category)).group_by(Book.category).all()
     categorie_dict = []
-    print(categories)
+
     for (category, count) in categories:
-        print(f"{category}----{count}")
         categorie_dict.append({'title': category, 'count': count})
-    print(categorie_dict)
 
     params = {
         "hotbooks": bookDict,
         "booklist": [],
         "notelist": noteDict,
+        "reviews": reviewDict,
         "categories": categorie_dict
     }
     return result(1000, '', params)
@@ -112,9 +112,6 @@ def book(id):
     reviewDict = revieShema.dump(reviews)
     bookDict["reviews"] = reviewDict
 
-    print(f"quotes.count:{len(quotes)}")
-    print(f"book.dict:{bookDict}")
-    print(f"book.notes:{book.quotes}")
     return result(1000, '', bookDict)
 
 
@@ -163,8 +160,14 @@ def user(id):
     notes = Quote.query.filter_by(user_id=id).limit(5).all()
     noteShema = QuoteShema(many=True)
     noteArray = noteShema.dump(notes)
-
     dict["notes"] = noteArray
+
+    reviews = Review.query.filter_by(author_id=id).limit(5).all()
+    reviewShema = ReviewShema(many=True)
+    reviewArray = reviewShema.dump(reviews)
+    dict["reviews"] = reviewArray
+
+    print(f"user.detail{dict}")
     return result(1000, '', dict)
 
 @bp.route('/book/quote/<int:id>', methods=['POST'])

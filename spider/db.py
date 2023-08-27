@@ -44,6 +44,9 @@ class DBManager:
             else:
                 print(len(item))
 
+    def books(self):
+        with self.session as s:
+            return s.query(Book).all()
 
 class Book(Base):
     __tablename__='book'
@@ -51,6 +54,7 @@ class Book(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(255), comment="书名")
     cover_url = Column(String(255), comment="封面")
+    image_url = Column(String(255), comment="封面地址")
     author = Column(String(50), comment="作者")
     price = Column(Float, default=0, comment="定价")
     desc = Column(Text, nullable=True, comment="简介")

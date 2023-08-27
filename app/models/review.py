@@ -1,4 +1,4 @@
-from app.extensions import db
+from app.extensions import db, date_style
 from marshmallow import Schema, fields, post_load
 from datetime import datetime
 from app.models.user import UserSchema
@@ -27,11 +27,11 @@ class ReviewShema(Schema):
     title = fields.Str()
     content = fields.Str()
     like_count = fields.Int()
-    created_at = fields.DateTime()
-    updated_at = fields.DateTime()
+    created_at = fields.DateTime(date_style)
+    updated_at = fields.DateTime(date_style)
 
     author = fields.Nested(UserSchema, only=("id", "name", "nickname", "state",))
-    book = fields.Nested(BookSchema, only=("id","name"))
+    book = fields.Nested(BookSchema, only=("id","name", "image_url"))
     @post_load
     def make_review(self, data, **kwargs):
         return Review(**data)

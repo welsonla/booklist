@@ -1,4 +1,4 @@
-from app.extensions import db
+from app.extensions import db, date_style
 from datetime import datetime
 from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -58,5 +58,5 @@ class UserSchema(Schema):
     role = fields.Int()
     state = fields.Int()
     email = fields.Str()
-    created_at = fields.DateTime()
-    updated_at = fields.DateTime()
+    created_at = fields.DateTime(date_style)
+    updated_at = fields.DateTime(date_style)

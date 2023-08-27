@@ -29,8 +29,8 @@ class QuoteShema(Schema):
     content = fields.Str()
     comment = fields.Str()
     state = fields.Int()
-    create_at = fields.DateTime()
-    update_at = fields.DateTime()
+    create_at = fields.DateTime(('%Y-%m-%d %H:%M:%S'))
+    update_at = fields.DateTime(('%Y-%m-%d %H:%M:%S'))
     # 过滤字段
     user = fields.Nested(UserSchema, only=("id", "name", "nickname", "state"))
     book = fields.Nested(BookSchema, only=("id", "name", "cover_url", "author"))

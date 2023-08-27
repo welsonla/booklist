@@ -1,4 +1,4 @@
-from app.extensions import db
+from app.extensions import db, date_style
 # from flask_sqlalchemy import Column,String,Integer,Text,Float,DateTime
 import datetime
 from marshmallow import Schema, fields
@@ -11,6 +11,7 @@ class Book(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), comment="书名")
     cover_url = db.Column(db.String(255), comment="封面")
+    image_url = db.Column(db.String(255), comment="封面图的地址")
     author = db.Column(db.String(50), comment="作者")
     price = db.Column(db.Float, default=0, comment="定价")
     desc = db.Column(db.Text, nullable=True, comment="简介")
@@ -34,6 +35,7 @@ class BookSchema(Schema):
     id = fields.Int(dump_only=True)
     name = fields.Str()
     cover_url = fields.Str()
+    image_url = fields.Str()
     author = fields.Str()
     price = fields.Float()
     desc = fields.Str()
@@ -45,7 +47,7 @@ class BookSchema(Schema):
     publish_date = fields.Str()
     douban_url = fields.Str()
     category = fields.Str()
-    created_at = fields.DateTime()
-    updated_at = fields.DateTime()
+    created_at = fields.DateTime(date_style)
+    updated_at = fields.DateTime(date_style)
 
     # quotes = fields.Nested(QuoteShema, many=True)
