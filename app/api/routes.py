@@ -8,6 +8,7 @@ from app.models.book import Book, BookSchema
 from app.models.note import Note, NoteSchema
 from app.models.quote import Quote, QuoteShema
 from app.models.review import Review, ReviewShema
+from app.functions import get_userid_by_sign
 
 import uuid
 
@@ -18,20 +19,20 @@ def login():
     params = request.get_json()
     username = params["username"]
     password = params['password']
-    u = User.query.filter_by(name=username).first()
-    if u is not None:
-        if u.valid_password(password):
+    user = User.query.filter_by(name=username).first()
+    if user is not None:
+        if user.valid_password(password):
             token = str(uuid.uuid4())
-            access_token = AccessToken.query.filter_by(userid=u.id).first()
+            access_token = AccessToken.query.filter_by(userid=user.id).first()
             if access_token is None:
                 access_token = AccessToken()
-            access_token.userid = u.id
+            access_token.userid = user.id
             access_token.token = token
             db.session.add(access_token)
             db.session.commit()
 
             schema = UserSchema()
-            dict = schema.dump(u)
+            dict = schema.dump(user)
             resp = {"user": dict, "sign": token}
             return result(1000, "登录成功", resp)
         else:
@@ -120,8 +121,6 @@ def quote_create():
     """发表摘抄与评论"""
     # 获取登录用户的cookie标识
     sign = request.headers.get('sign')
-    print(f"sign:{sign}")
-    print(f"headers:{request.headers}")
     # 查找登录用户信息
     token = AccessToken.query.filter_by(token=sign).first()
     if token is not None:
@@ -144,7 +143,6 @@ def quote_create():
 
         quoteSchema = QuoteShema()
         dict = quoteSchema.dump(quote)
-        print(f"发表成功:{dict}")
         return result(1000, '', dict)
     else:
         print("未找到用户")
@@ -167,7 +165,6 @@ def user(id):
     reviewArray = reviewShema.dump(reviews)
     dict["reviews"] = reviewArray
 
-    print(f"user.detail{dict}")
     return result(1000, '', dict)
 
 @bp.route('/book/quote/<int:id>', methods=['POST'])
@@ -187,11 +184,8 @@ def review_ceate():
     data.author_id = 1
     db.session.add(data)
     db.session.commit()
-    print(f"review.data:{data}")
     dict = reviewShema.dump(data)
-    print(f"review:{dict}")
     return result(1000, '', dict )
-
 
 @bp.route('/book/review/<int:id>',methods=["POST"])
 def review_detail(id):
@@ -200,8 +194,6 @@ def review_detail(id):
     reviewShema = ReviewShema()
     dict = reviewShema.dump(review)
     return result(1000, '', dict)
-
-
 
 @bp.route('/logout', methods=['POST'])
 def logout():
