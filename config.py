@@ -8,7 +8,9 @@ class Config:
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'booklist.sqlite')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-
+LANGUAGES = {
+    "zh_CN":"中文",
+}
 # flask shell
 # from app.extensions import  db
 # from app.models import Book

@@ -152,20 +152,33 @@ def quote_create():
 @bp.route('/user/<int:id>', methods=('POST',))
 def user(id):
     user = User.query.get(id)
-    userShema = UserSchema()
-    dict = userShema.dump(user)
+    if user is not None:
+        userShema = UserSchema()
+        dict = userShema.dump(user)
 
-    notes = Quote.query.filter_by(user_id=id).limit(5).all()
-    noteShema = QuoteShema(many=True)
-    noteArray = noteShema.dump(notes)
-    dict["notes"] = noteArray
+        # 加载收藏
+        # favorites = Favorite.query.filter_by(user_id=id).limit(5).all
+        # favoriteShema = FavoriteShema(many=True)
+        # favoriteArray = favoriteShema.dump(favorites)
+        # dict["favoriteArray"] = favoriteArray
 
-    reviews = Review.query.filter_by(author_id=id).limit(5).all()
-    reviewShema = ReviewShema(many=True)
-    reviewArray = reviewShema.dump(reviews)
-    dict["reviews"] = reviewArray
+        # 加载用户笔记
+        notes = Quote.query.filter_by(user_id=id).limit(5).all()
+        noteShema = QuoteShema(many=True)
+        noteArray = noteShema.dump(notes)
+        dict["notes"] = noteArray
 
-    return result(1000, '', dict)
+        # 加载书单
+        # collects = Collect.query.filter_by(author_id=id).limit(5).all()
+        # collectShema = CollectShema(many=True)
+        # collectArray = collectShema.dump(collects)
+        reviews = Review.query.filter_by(author_id=id).limit(5).all()
+        reviewShema = ReviewShema(many=True)
+        reviewArray = reviewShema.dump(reviews)
+        dict["reviews"] = reviewArray
+
+        return result(1000, '', dict)
+    return result(1005,'用户信息不存在', [])
 
 @bp.route('/book/quote/<int:id>', methods=['POST'])
 def quote_detail(id):
@@ -194,6 +207,28 @@ def review_detail(id):
     reviewShema = ReviewShema()
     dict = reviewShema.dump(review)
     return result(1000, '', dict)
+
+@bp.route("/book/collect/create", methods=['POST'])
+def collect_create():
+    # 获取请求中的json映射成实体
+    jsonData = request.get_json()
+    collectShema = collectShema()
+    collect = collectShema.load(jsonData, many=False)
+    # 添加关联图书
+    books = jsonData.get("list")
+    for book in books:
+        bookShema = BookSchema()
+        bookItem = bookShema.load(book, many=False)
+        collect.books.append(bookItem)
+
+    db.session.add(collect)
+    db.session.commit()
+    # 返回创建成功的书单
+    result = collectShema.dump(collect)
+    return result(1000, '书单创建成功', result)
+
+
+
 
 @bp.route('/logout', methods=['POST'])
 def logout():

@@ -9,8 +9,33 @@
 {#    {% endblock %}#}
 
       <!-- 左侧导航栏 -->
-     <ul class="nav nav-pills nav-stacked">
-        {{ layout.menu() }}
-        {{ layout.menu_links() }}
-     </ul>
+{#     <ul class="nav nav-pills nav-stacked">#}
+{#        {{ layout.menu() }}#}
+{#        {{ layout.menu_links() }}#}
+{#     </ul>#}
+    <!-- End 左侧导航栏 -->
+    <!-- 左侧导航栏 -->
+    <ul class="nav nav-pills nav-stacked">
+  <li>
+      <a class="nav-link" href="/admin/dashboard/">控制台</a>
+    </li>
+  <li class="active">
+    <a class="nav-link" href="/admin/user/">
+      用户管理</a>
+  </li>
+  <li>
+    <a class="nav-link" href="/admin/book/">
+      图书管理</a>
+  </li>
+  <li>
+    <a class="nav-link" href="/admin/collect/">
+      书单管理</a>
+  </li>
+  <li>
+      <a class="nav-link" href="/admin/quote/">笔记管理</a></li>
+{#  <li>#}
+{#    <a class="nav-link" href="/admin/fileadmin/">#}
+{#      uploads</a>#}
+{#  </li>#}
+</ul>
 </nav>

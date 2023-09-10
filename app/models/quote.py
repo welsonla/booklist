@@ -12,7 +12,7 @@ class Quote(db.Model):
     chapter = db.Column(db.String, comment='章节')
     page = db.Column(db.Integer, default=0, comment='页码')
     content = db.Column(db.Text, comment='摘抄')
-    comment = db.Column(db.Integer, comment='点评')
+    comment = db.Column(db.Text, comment='点评')
     state = db.Column(db.Integer, default=1, comment='0删除,1正常')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

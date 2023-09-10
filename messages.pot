@@ -1,0 +1,11 @@
+msgid "User"
+msgstr "用户"
+
+msgid "Nickname"
+msgstr "昵称"
+
+msgid "email"
+msgstr "邮箱"
+
+msgid "nickname"
+msgstr "昵称"
