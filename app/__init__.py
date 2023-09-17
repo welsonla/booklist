@@ -15,12 +15,14 @@ from app.models.user import User
 from app.models.book import Book
 from app.models.quote import Quote
 from app.models.collect import Collect
+from app.models.review import Review
 from app.dashboard.model_view.quote_view import QuoteView
 from app.dashboard.model_view.user_view import UserView
 from app.dashboard.model_view.book_view import BookView
 from app.dashboard.model_view.dashboard_view import DashboardView
 from app.dashboard.model_view.admin_view import AdminView
 from app.dashboard.model_view.collect_view import CollectView
+from app.dashboard.model_view.review_view import ReviewView
 from flask_admin.contrib.fileadmin import FileAdmin
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -60,6 +62,7 @@ def create_app(config_class=Config):
     admin.add_view(BookView(Book, db.session))
     admin.add_view(QuoteView(Quote, db.session))
     admin.add_view(CollectView(Collect, db.session))
+    admin.add_view(ReviewView(Review, db.session))
     admin.add_view(DashboardView(name='Dashboard', endpoint='dashboard'))
 
     admin.add_view(DashboardView(name='Hello 1', endpoint='test1', category='Test'))

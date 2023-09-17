@@ -1,3 +1,5 @@
+import re
+
 from app.api import bp
 from flask import Flask, jsonify, request
 from app.extensions import db
@@ -8,7 +10,10 @@ from app.models.book import Book, BookSchema
 from app.models.note import Note, NoteSchema
 from app.models.quote import Quote, QuoteShema
 from app.models.review import Review, ReviewShema
+from app.models.collect import Collect,CollectShema
+from app.models.favorite import Favorite
 from app.functions import get_userid_by_sign
+from sqlalchemy.exc import SQLAlchemyError
 
 import uuid
 
@@ -187,6 +192,48 @@ def quote_detail(id):
     dict = quoteSchema.dump(quote)
     return result(1000, '', dict)
 
+@bp.route('/book/note/wechat/import', methods=['POST'])
+def note_wechat_import():
+    """导入微信读书笔记"""
+    jsonData = request.get_json()
+    content = jsonData.get('content')
+    book_id = jsonData.get('book_id')
+    author_id = get_userid_by_sign(request.get_data('sign'))
+    try:
+        # 按章节拆分数据
+        chapters = content.split("◆")
+        for chapter in chapters:
+            # 拆分标注条目
+            noteArray = chapter.split("\n")
+            # 第一行数据为章节名称
+            chapter_name = noteArray[0].replace("◆","")
+            # 解析标注条目
+            for note in noteArray[1:]:
+                # 检查标注中是否包含个人笔记
+                lines = note.splitlines()
+                note = parse_note(lines, chapter_name, book_id, author_id)
+                db.session.add(note)
+            # 保存变更
+        db.session.commit()
+    except SQLAlchemyError as e:
+        return  result(1010, '数据库操作失败')
+    return  result(1000, '导入成功', [])
+
+def parse_note(lines, chapter_name, book_id, author_id):
+    quote = Quote()
+    for line in lines:
+        quote.chapter = chapter_name
+        quote.book_id = book_id
+        quote.author_id = author_id
+        if re.match(r"\d{4}/\d{1,2}/\d{1,2}", line):
+            continue
+        elif line.startwith(">>"):
+            # 标注内容
+            quote.content = line.replace(">>")
+        else:
+            # 个人笔记
+            quote.comment = line
+    return quote
 
 @bp.route('/book/review/create', methods=['POST'])
 def review_ceate():
@@ -227,9 +274,6 @@ def collect_create():
     result = collectShema.dump(collect)
     return result(1000, '书单创建成功', result)
 
-
-
-
 @bp.route('/logout', methods=['POST'])
 def logout():
     """退出登录，清理本地用户信息"""
@@ -239,3 +283,28 @@ def logout():
 @bp.route('/book/comment', methods=['POST'])
 def comment():
     return ""
+
+@bp.route('/favoriate/add', methods=['POST'])
+def favorite_add():
+    """用户添加收藏"""
+    jsonData = request.get_json()
+    type_id = jsonData.get('type')
+    item_id = jsonData.get('item')
+    if checkContent(type_id, item_id) is not None:
+        favorite = Favorite()
+        favorite.type = type_id
+        favorite.item_id = item_id
+        db.session.add(favorite)
+        db.session.commit()
+        return result(1000, '收藏添加成功', [])
+    return result(1008, "收藏的内容不存在", [])
+
+
+def checkContent(type_id,item_id):
+    """检查收藏内容是否存在"""
+    if type_id == 'note':
+        return Quote.query.get(item_id)
+    elif type_id == 'book':
+        return Book.query.get(item_id)
+    elif type_id == 'collect':
+        return Collect.query.get(item_id)

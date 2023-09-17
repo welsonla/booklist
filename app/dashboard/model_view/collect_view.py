@@ -1,4 +1,7 @@
+from flask_admin import expose
 from flask_admin.form import SecureForm
+from flask_admin.model.template import EndpointLinkRowAction
+
 from app.dashboard.model_view.admin_view import AdminView
 from wtforms.fields import SelectField
 from flask import render_template, request,flash, redirect
@@ -10,28 +13,26 @@ class CollectView(AdminView):
     # 定义分页数量
     page_size = 10
     # 定义查询列表
-    column_list = ["id",  "name", 'like_count', "created_at", "updated_at"] #"cover_url",
+    column_list = ["id",  "name", 'like_count', "is_recommand", "updated_at"] #"cover_url",
     # column_searchable_list = ["name", "author"]
     column_default_sort = ("created_at", True)
-    # column_filters = ["name"]
 
-    # 自定义字段显示
-    # form_overrides = dict(category=SelectField)
-    # form_args = dict(
-    #     category=dict(
-    #         choices=[(0, '正常'), (1, '下架')]
-    #     )
-    # )
+    column_extra_row_actions = [
+        EndpointLinkRowAction(
+            'fa fa-heart glyphicon glyphicon-trash',
+            'quote.activate_user_view',
+        )
+    ]
 
-    # column_widths = {
-    #     "chapter":150,
-    #     "page": 80,
-    #     "comment": 200
-    # }
-    #
+    column_searchable_list = ["name"]
+
+    column_formatters = {
+        'is_recommand': lambda v, c, m, p: '未推荐' if m.is_recommand == 0 else '推荐'
+    }
+
     column_labels = {
         "name":"书单名称",
-        # "content": "摘抄",
+        "is_recommand": "推荐状态",
         "like_count":"收藏次数",
         "state":"状态",
         "created_at": "创建时间",
@@ -50,3 +51,7 @@ class CollectView(AdminView):
             return redirect('/admin/collect')
         else:
             flash["message"] = "书单信息不正确"
+
+    expose('/activate/', methods=('GET',))
+    def activate_user_view(self):
+        print(f"Hello")

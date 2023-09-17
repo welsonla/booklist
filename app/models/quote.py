@@ -13,6 +13,7 @@ class Quote(db.Model):
     page = db.Column(db.Integer, default=0, comment='页码')
     content = db.Column(db.Text, comment='摘抄')
     comment = db.Column(db.Text, comment='点评')
+    is_recommand = db.Column(db.Integer, nullable=False, default=0, comment="推荐状态")
     state = db.Column(db.Integer, default=1, comment='0删除,1正常')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -29,8 +30,8 @@ class QuoteShema(Schema):
     content = fields.Str()
     comment = fields.Str()
     state = fields.Int()
-    create_at = fields.DateTime(('%Y-%m-%d %H:%M:%S'))
-    update_at = fields.DateTime(('%Y-%m-%d %H:%M:%S'))
+    created_at = fields.DateTime(('%Y-%m-%d %H:%M:%S'))
+    updated_at = fields.DateTime(('%Y-%m-%d %H:%M:%S'))
     # 过滤字段
     user = fields.Nested(UserSchema, only=("id", "name", "nickname", "state"))
     book = fields.Nested(BookSchema, only=("id", "name", "cover_url", "author"))

@@ -18,6 +18,7 @@ class Collect(db.Model):
     content = db.Column(db.Text, comment="书单简介")
     like_count = db.Column(db.Integer, default=0, comment="点赞数量")
     visit_count = db.Column(db.Integer, default=0, comment="浏览量")
+    is_recommand = db.Column(db.Integer, nullable=False, default=0, comment="推荐状态")
     created_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="创建时间")
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="更新时间")
 

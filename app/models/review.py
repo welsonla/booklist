@@ -13,6 +13,7 @@ class Review(db.Model):
     title = db.Column(db.String, default='', comment="标题")
     content = db.Column(db.Text, nullable=True, comment="书评内容")
     like_count = db.Column(db.Integer, default=0, comment="喜欢次数")
+    is_recommand = db.Column(db.Integer, nullable=False, default=0, comment="推荐状态")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow,  onupdate=datetime.utcnow)
 

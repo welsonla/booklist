@@ -1,32 +1,48 @@
 from flask_admin import expose
 from flask_admin.form import SecureForm
-from flask_admin.helpers import get_redirect_target
 from flask_admin.model.template import EndpointLinkRowAction
 
 from app.dashboard.model_view.admin_view import AdminView
 from wtforms.fields import SelectField
 from flask import render_template, request,flash, redirect
-from app.models.quote import Quote
-from app.models.user import User
-from app.models.favorite import Favorite
+from app.models.review import Review
 from app.extensions import db
 
-class QuoteView(AdminView):
+class ReviewView(AdminView):
     form_base_class = SecureForm
-
     # 定义分页数量
     page_size = 10
     # 定义查询列表
-    column_list = ["id",  "chapter", 'page', "is_recommand", "updated_at"] #"cover_url",
-    # column_searchable_list = ["name", "author"]
+    # column_list = ["id", "title", 'is_recommand'],
+    column_list = ["id", "title", 'is_recommand', "like_count", "updated_at"]  # "cover_url",
     column_default_sort = ("created_at", True)
-    # column_filters = ["name"]
 
-    column_searchable_list = ["content", "comment", "chapter"]
+    # 自定义字段显示
+    # form_args = dict(
+    #     is_recommand=dict(
+    #         choices=[(0, '正常'), (1, '下架')]
+    #     )
+    # )
 
     column_formatters = {
         'is_recommand': lambda v, c, m, p: '未推荐' if m.is_recommand == 0 else '推荐'
     }
+
+    # column_choices = {
+    #     'is_recommand': [
+    #         (0, '未推荐'),
+    #         (1,'推荐')
+    #     ]
+    # }
+
+    column_searchable_list = ["title", "content"]
+
+    column_extra_row_actions = [
+        EndpointLinkRowAction(
+            'fa fa-heart glyphicon glyphicon-trash',
+            'quote.activate_user_view',
+        )
+    ]
 
     column_widths = {
         "chapter":150,
@@ -35,23 +51,13 @@ class QuoteView(AdminView):
     }
 
     column_labels = {
-        "chapter":"章节",
-        # "content": "摘抄",
-        "page":"页码",
-        "comment":"笔记",
+        "title":"标题",
+        "like_count": "收藏次数",
         "content":"内容",
-        "state":"状态",
-        "is_recommand": "推荐状态",
+        "is_recommand":"推荐状态",
         "created_at": "创建时间",
         "updated_at": "更新时间",
     }
-
-    column_extra_row_actions = [
-        EndpointLinkRowAction(
-            'fa fa-heart glyphicon glyphicon-trash',
-            'quote.activate_user_view',
-        )
-    ]
 
     def delete(self):
         params = request.form.to_dict()
@@ -76,21 +82,3 @@ class QuoteView(AdminView):
     @expose('/activate/', methods=('GET',))
     def activate_user_view(self):
         print(f"Hello")
-        """
-            Activate user model view. Only GET method is allowed.
-        """
-        # return_url = get_redirect_target() or self.get_url('.index_view')
-        #
-        # id = request.args["id"]
-        # model = self.get_one(id)
-        #
-        # if model is None:
-        #     return redirect(return_url)
-        #
-        # if model.active:
-        #     return redirect(return_url)
-        #
-        # model.active = True
-        # model.save()
-        #
-        # return redirect(return_url)
