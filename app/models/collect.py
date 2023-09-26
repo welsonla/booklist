@@ -12,6 +12,10 @@ collect_book_table = db.Table(
 )
 
 class Collect(db.Model):
+
+    # 搜索字段
+    __searchable__ = ['name', 'content']
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), comment="书单名")
     author_id = db.Column(db.Integer, db.ForeignKey("user.id"),comment="外键, 作者Id")

@@ -3,3 +3,7 @@ venv/
 app/__pycache__
 __pycache__
 .idea
+msearch/book
+msearch/collect
+msearch/quote
+msearch/review

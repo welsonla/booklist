@@ -5,7 +5,7 @@ from flask import Flask, jsonify, request
 from app.extensions import db
 from app.models.access_token import AccessToken
 from app.models.user import User, UserSchema
-from app.extensions import result
+from app.extensions import result, search
 from app.models.book import Book, BookSchema
 from app.models.note import Note, NoteSchema
 from app.models.quote import Quote, QuoteShema
@@ -14,7 +14,6 @@ from app.models.collect import Collect,CollectShema
 from app.models.favorite import Favorite
 from app.functions import get_userid_by_sign
 from sqlalchemy.exc import SQLAlchemyError
-
 import uuid
 
 
@@ -308,3 +307,17 @@ def checkContent(type_id,item_id):
         return Book.query.get(item_id)
     elif type_id == 'collect':
         return Collect.query.get(item_id)
+
+
+@bp.route('/search', methods=['POST'])
+def full_text_search():
+    """全文搜索"""
+    keyword = request.get_json().get('q')
+    # r1 = Book.query.msearch(keyword, fields=['title'], limit=20)
+    r = search.whoosh_search(Book, query=keyword, fields=['name','isbn','author',"desc"], limit=20)
+    dict = []
+    for book in r:
+        hitDict = {"title":book["name"], "author":book["author"],"id":book["id"]}
+        dict.append(hitDict)
+        print(f"book.name:{book} --- {type(book)} --- {book.score} --- {book.rank} ")
+    return result(1000,"",dict)

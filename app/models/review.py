@@ -6,6 +6,9 @@ from app.models.book import BookSchema
 
 class Review(db.Model):
     """书评"""
+    # 搜索字段
+    __searchable__ = ['title', 'content']
+
     id = db.Column(db.Integer, primary_key=True)
     book_id = db.Column(db.Integer, db.ForeignKey('book.id'), comment="图书id")
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'), comment="作者id")

@@ -1,3 +1,4 @@
+import logging
 import os
 import os.path as op
 from flask import Flask, render_template
@@ -6,7 +7,7 @@ from app.main import bp as main_bp
 from app.posts import bp as post_bp
 from app.questions import bp as question_bp
 from app.api import bp as api_bp
-from app.extensions import db
+from app.extensions import db, search
 from flask_login import LoginManager
 from app.commands import user_cli
 from flask_admin import Admin
@@ -27,13 +28,13 @@ from flask_admin.contrib.fileadmin import FileAdmin
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_babelex import Babel
+from flask_msearch import Search
 
 def create_app(config_class=Config):
     app = Flask(__name__, template_folder="templates", instance_relative_config=True)
     app.config.from_object(config_class)
 
     login_manager = LoginManager(app)
-
     # 配置支持跨域
     CORS(app)
 
@@ -44,17 +45,26 @@ def create_app(config_class=Config):
     # 注册数据库管理类
     db.init_app(app)
 
+    # 创建搜索索引
+    search.init_app(app)
+    # with app.app_context():
+    #     search.create_index(Book)
+    #     search.create_index(Quote)
+    #     search.create_index(Collect)
+    #     search.create_index(Review)
+
     # 中文本地化
     babel = Babel(app)
     app.config['BABEL_DEFAULT_LOCALE'] = 'zh_CN'
     app.config["LANGUAGES"] = {"zh_CN":"Chinese"}
     app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
 
+
     migrate = Migrate(app, db)
 
     # AdminLTE
-    app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
-    app.config['BABEL_DEFAULT_LOCALE'] = 'zh_CN'
+    # app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
+    # app.config['BABEL_DEFAULT_LOCALE'] = 'zh_CN'
 
     admin = Admin(app, name='Dashboard', template_mode='bootstrap4', base_template='dashboard/layout.html') # index_view=DashboardView(name='Dashboard', url='/dashboard', endpoint='admin')
     # 注册自定义的 ModelView

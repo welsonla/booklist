@@ -8,6 +8,9 @@ class Book(db.Model):
     """图书表"""
     __tablename__='book'
 
+    # 搜索字段
+    __searchable__ = ['name', 'author', 'isbn', "desc"]
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), comment="书名")
     cover_url = db.Column(db.String(255), comment="封面")

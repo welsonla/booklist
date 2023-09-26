@@ -1,7 +1,11 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, jsonify, request
+from flask_msearch import Search
+from jieba.analyse import ChineseAnalyzer
 
 db = SQLAlchemy()
+
+search = Search(analyzer=ChineseAnalyzer())
 
 # 日期格式
 date_style = '%Y-%m-%d %H:%M:%S'

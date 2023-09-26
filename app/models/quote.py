@@ -6,6 +6,10 @@ from app.models.book import BookSchema
 
 class Quote(db.Model):
     """图书摘录"""
+
+    # 搜索字段
+    __searchable__ = ['chapter', 'content', 'comment']
+
     id = db.Column(db.Integer, primary_key=True)
     book_id = db.Column(db.Integer, db.ForeignKey('book.id'), comment='图书id')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), comment='作者id')
