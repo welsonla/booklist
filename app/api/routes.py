@@ -10,10 +10,11 @@ from app.models.book import Book, BookSchema
 from app.models.note import Note, NoteSchema
 from app.models.quote import Quote, QuoteShema
 from app.models.review import Review, ReviewShema
-from app.models.collect import Collect,CollectShema
+from app.models.collect import Collect, CollectShema
 from app.models.favorite import Favorite
 from app.functions import get_userid_by_sign
 from sqlalchemy.exc import SQLAlchemyError
+import math
 import uuid
 
 
@@ -129,7 +130,7 @@ def quote_create():
     token = AccessToken.query.filter_by(token=sign).first()
     if token is not None:
         params = request.get_json()
-        book_id  = params["bookid"]
+        book_id = params["bookid"]
         chapter = params["chapter"]
         page = params["page"] or 0
         content = params["content"]
@@ -182,7 +183,8 @@ def user(id):
         dict["reviews"] = reviewArray
 
         return result(1000, '', dict)
-    return result(1005,'用户信息不存在', [])
+    return result(1005, '用户信息不存在', [])
+
 
 @bp.route('/book/quote/<int:id>', methods=['POST'])
 def quote_detail(id):
@@ -190,6 +192,7 @@ def quote_detail(id):
     quoteSchema = QuoteShema()
     dict = quoteSchema.dump(quote)
     return result(1000, '', dict)
+
 
 @bp.route('/book/note/wechat/import', methods=['POST'])
 def note_wechat_import():
@@ -205,7 +208,7 @@ def note_wechat_import():
             # 拆分标注条目
             noteArray = chapter.split("\n")
             # 第一行数据为章节名称
-            chapter_name = noteArray[0].replace("◆","")
+            chapter_name = noteArray[0].replace("◆", "")
             # 解析标注条目
             for note in noteArray[1:]:
                 # 检查标注中是否包含个人笔记
@@ -215,8 +218,9 @@ def note_wechat_import():
             # 保存变更
         db.session.commit()
     except SQLAlchemyError as e:
-        return  result(1010, '数据库操作失败')
-    return  result(1000, '导入成功', [])
+        return result(1010, '数据库操作失败')
+    return result(1000, '导入成功', [])
+
 
 def parse_note(lines, chapter_name, book_id, author_id):
     quote = Quote()
@@ -234,6 +238,7 @@ def parse_note(lines, chapter_name, book_id, author_id):
             quote.comment = line
     return quote
 
+
 @bp.route('/book/review/create', methods=['POST'])
 def review_ceate():
     """创建书评"""
@@ -244,9 +249,10 @@ def review_ceate():
     db.session.add(data)
     db.session.commit()
     dict = reviewShema.dump(data)
-    return result(1000, '', dict )
+    return result(1000, '', dict)
 
-@bp.route('/book/review/<int:id>',methods=["POST"])
+
+@bp.route('/book/review/<int:id>', methods=["POST"])
 def review_detail(id):
     """获取书评"""
     review = Review.query.get(id)
@@ -254,11 +260,12 @@ def review_detail(id):
     dict = reviewShema.dump(review)
     return result(1000, '', dict)
 
+
 @bp.route("/book/collect/create", methods=['POST'])
 def collect_create():
     # 获取请求中的json映射成实体
     jsonData = request.get_json()
-    collectShema = collectShema()
+    collectShema = CollectShema()
     collect = collectShema.load(jsonData, many=False)
     # 添加关联图书
     books = jsonData.get("list")
@@ -273,6 +280,7 @@ def collect_create():
     result = collectShema.dump(collect)
     return result(1000, '书单创建成功', result)
 
+
 @bp.route('/logout', methods=['POST'])
 def logout():
     """退出登录，清理本地用户信息"""
@@ -282,6 +290,7 @@ def logout():
 @bp.route('/book/comment', methods=['POST'])
 def comment():
     return ""
+
 
 @bp.route('/favoriate/add', methods=['POST'])
 def favorite_add():
@@ -299,7 +308,7 @@ def favorite_add():
     return result(1008, "收藏的内容不存在", [])
 
 
-def checkContent(type_id,item_id):
+def checkContent(type_id, item_id):
     """检查收藏内容是否存在"""
     if type_id == 'note':
         return Quote.query.get(item_id)
@@ -313,11 +322,37 @@ def checkContent(type_id,item_id):
 def full_text_search():
     """全文搜索"""
     keyword = request.get_json().get('q')
-    # r1 = Book.query.msearch(keyword, fields=['title'], limit=20)
-    r = search.whoosh_search(Book, query=keyword, fields=['name','isbn','author',"desc"], limit=20)
-    dict = []
-    for book in r:
-        hitDict = {"title":book["name"], "author":book["author"],"id":book["id"]}
-        dict.append(hitDict)
+    page = request.get_json().get('p') or 1
+    results = search.msearch(Book, query=keyword, fields=['name', 'isbn', 'author', "desc"])
+    sourceArray = []
+    for book in results:
+        hitDict = {
+            "title": book["name"],
+            "author": book["author"],
+            "id": book["id"],
+            "content": book["desc"]
+        }
+        sourceArray.append(hitDict)
         print(f"book.name:{book} --- {type(book)} --- {book.score} --- {book.rank} ")
-    return result(1000,"",dict)
+    pagination = paginate(sourceArray, page=page, per_page=20)
+    return result(1000, "", pagination)
+
+
+def paginate(dataArray=[], page=1, per_page=20):
+    # 总页数
+    total = math.ceil(len(dataArray) / 20)
+    # 起始索引
+    offset = (page - 1) * per_page
+    # 结束索引
+    end = offset + per_page
+    if len(dataArray) < end:
+        end = offset + len(dataArray) % per_page
+    # 当页数据
+    list = dataArray[offset:end]
+    return {
+        "total_page": total,
+        "total_count":len(dataArray),
+        "start": offset,
+        "end": end,
+        "list": list
+    }
