@@ -256,6 +256,7 @@ def review_ceate():
 def review_detail(id):
     """获取书评"""
     review = Review.query.get(id)
+    print(f"review:${review.author}")
     reviewShema = ReviewShema()
     dict = reviewShema.dump(review)
     return result(1000, '', dict)

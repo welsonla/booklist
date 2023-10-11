@@ -2,8 +2,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, jsonify, request
 from flask_msearch import Search
 from jieba.analyse import ChineseAnalyzer
+from flask_marshmallow import Marshmallow
 
 db = SQLAlchemy()
+
+ma = Marshmallow()
 
 search = Search(analyzer=ChineseAnalyzer())
 

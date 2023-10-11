@@ -1,4 +1,4 @@
-from app.extensions import db, date_style
+from app.extensions import db, date_style, ma
 from marshmallow import Schema, fields, post_load
 from datetime import datetime
 from app.models.user import UserSchema
@@ -20,22 +20,18 @@ class Review(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow,  onupdate=datetime.utcnow)
 
-    author = db.relationship('User', back_populates='reviews')
+    author = db.relationship('User', backref='reviews')
     book = db.relationship('Book', back_populates='reviews')
 
-class ReviewShema(Schema):
-    id = fields.Int()
-    book_id = fields.Int()
-    author_id = fields.Int()
-    rating = fields.Float()
-    title = fields.Str()
-    content = fields.Str()
-    like_count = fields.Int()
-    created_at = fields.DateTime(date_style)
-    updated_at = fields.DateTime(date_style)
+class ReviewShema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Review
+        include_fk = True
 
+    # 输出关联Model
     author = fields.Nested(UserSchema, only=("id", "name", "nickname", "state",))
     book = fields.Nested(BookSchema, only=("id","name", "image_url"))
+
     @post_load
     def make_review(self, data, **kwargs):
         return Review(**data)

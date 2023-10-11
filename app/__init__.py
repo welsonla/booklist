@@ -7,7 +7,7 @@ from app.main import bp as main_bp
 from app.posts import bp as post_bp
 from app.questions import bp as question_bp
 from app.api import bp as api_bp
-from app.extensions import db, search
+from app.extensions import db, search, ma
 from flask_login import LoginManager
 from app.commands import user_cli
 from flask_admin import Admin
@@ -29,6 +29,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_babelex import Babel
 from flask_msearch import Search
+# from flask_marshmallow import Marshmallow
 
 def create_app(config_class=Config):
     app = Flask(__name__, template_folder="templates", instance_relative_config=True)
@@ -44,6 +45,9 @@ def create_app(config_class=Config):
 
     # 注册数据库管理类
     db.init_app(app)
+
+    # 注册Marshmallow
+    ma.init_app(app)
 
     # 创建搜索索引
     search.init_app(app)

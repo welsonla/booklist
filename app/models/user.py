@@ -23,7 +23,7 @@ class User(db.Model, UserMixin):
 
     quotes = db.relationship('Quote', backref='user')
 
-    reviews = db.relationship('Review', back_populates='author')
+    # reviews = db.relationship('Review', back_populates='author')
 
     def encode_password(self, password):
         """将密码进行散列加密"""
