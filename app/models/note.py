@@ -1,4 +1,4 @@
-from app.extensions import db
+from app.extensions import db, ma
 from sqlalchemy import ForeignKey
 from app.models.book import Book
 from app.models.user import User
@@ -19,13 +19,6 @@ class Note(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment='更新时间')
 
 
-class NoteSchema(Schema):
-    id = fields.Int()
-    title = fields.Str()
-    content = fields.Str()
-    book_id = fields.Int()
-    user_id = fields.Int()
-    like_count = fields.Int()
-    visit_count = fields.Int()
-    created_at = fields.DateTime()
-    updated_at = fields.DateTime()
+class NoteSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Note

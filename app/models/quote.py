@@ -1,4 +1,4 @@
-from app.extensions import db
+from app.extensions import db, ma
 from datetime import datetime
 from marshmallow import Schema, fields
 from app.models.user import User, UserSchema
@@ -22,20 +22,17 @@ class Quote(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     #  关联User
-    # user = db.relationship('User')
-    # book = db.relationship('Book', backref=db.backref("quotes", lazy='select')) # backref=db.backref("quotes", lazy="dynamic")
+    user = db.relationship('User')
+    book = db.relationship('Book', backref=db.backref("quotes", lazy='select')) # backref=db.backref("quotes", lazy="dynamic")
 
-class QuoteShema(Schema):
-    id = fields.Int()
-    book_id = fields.Int()
-    user_id = fields.Int()
-    chapter = fields.Str()
-    page = fields.Int()
-    content = fields.Str()
-    comment = fields.Str()
-    state = fields.Int()
+class QuoteShema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Quote
+        include_fk = True
+
     created_at = fields.DateTime(('%Y-%m-%d %H:%M:%S'))
     updated_at = fields.DateTime(('%Y-%m-%d %H:%M:%S'))
+
     # 过滤字段
     user = fields.Nested(UserSchema, only=("id", "name", "nickname", "state"))
     book = fields.Nested(BookSchema, only=("id", "name", "cover_url", "author"))

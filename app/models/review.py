@@ -21,7 +21,7 @@ class Review(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow,  onupdate=datetime.utcnow)
 
     author = db.relationship('User', backref='reviews')
-    book = db.relationship('Book', back_populates='reviews')
+    book = db.relationship('Book', backref='reviews')
 
 class ReviewShema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -31,6 +31,9 @@ class ReviewShema(ma.SQLAlchemyAutoSchema):
     # 输出关联Model
     author = fields.Nested(UserSchema, only=("id", "name", "nickname", "state",))
     book = fields.Nested(BookSchema, only=("id","name", "image_url"))
+
+    created_at = fields.DateTime(date_style)
+    updated_at = fields.DateTime(date_style)
 
     @post_load
     def make_review(self, data, **kwargs):

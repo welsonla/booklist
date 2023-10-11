@@ -1,4 +1,4 @@
-from app.extensions import db
+from app.extensions import db, ma
 from datetime import datetime
 from marshmallow import Schema, fields
 
@@ -28,19 +28,6 @@ class Collect(db.Model):
 
     # books = db.relationship("Book", secondary="collect_book")
 
-class CollectShema(Schema):
-    id = fields.Int()
-    name = fields.Str()
-    author_id = fields.Int()
-    content = fields.Str()
-    created_at = fields.DateTime()
-    updated_at = fields.DateTime()
-
-# class BookCollect(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     collect_id = db.Column(db.Ineteger, db.ForeignKey("collect.id"), comment="外键，书单Id")
-#     book_id = db.Column(db.Integer, db.ForeignKey("book.id"), comment="外键，图书Id")
-#     content = db.Column(db.Text, nullable=True, comment="图书评价")
-#     created_at = db.Column(db.Datetime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="创建时间")
-#     updated_at = db.Column(db.Datetime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="更新时间")
-    
+class CollectShema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Collect

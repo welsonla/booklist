@@ -1,4 +1,4 @@
-from app.extensions import db, date_style
+from app.extensions import db, date_style, ma
 from datetime import datetime
 from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -21,7 +21,7 @@ class User(db.Model, UserMixin):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    quotes = db.relationship('Quote', backref='user')
+    # quotes = db.relationship('Quote', backref='user')
 
     # reviews = db.relationship('Review', back_populates='author')
 
@@ -49,14 +49,9 @@ class Role(db.Model):
     updated_at = db.Column(db.DateTime(timezone=True), server_default=func.now(), onupdate=datetime.utcnow)
 
 
-class UserSchema(Schema):
-    id = fields.Int(dump_only=True)
-    name = fields.Str()
-    nickname = fields.Str()
-    password_hash = fields.Str()
-    bio = fields.Str()
-    role = fields.Int()
-    state = fields.Int()
-    email = fields.Str()
+class UserSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = User
+
     created_at = fields.DateTime(date_style)
     updated_at = fields.DateTime(date_style)

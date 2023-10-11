@@ -1,4 +1,4 @@
-from app.extensions import db
+from app.extensions import db, ma
 from datetime import datetime
 from marshmallow import Schema, fields
 
@@ -11,3 +11,7 @@ class Favorite(db.Model):
     state = db.Column(db.Integer, default=0, comment="状态")
     created_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="创建时间")
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="更新时间")
+
+class FavoriteSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Favorite
