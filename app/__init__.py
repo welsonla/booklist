@@ -5,7 +5,6 @@ from flask import Flask, render_template
 from config import Config
 from app.main import bp as main_bp
 from app.posts import bp as post_bp
-from app.questions import bp as question_bp
 from app.api import bp as api_bp
 from app.extensions import db, search, ma
 from flask_login import LoginManager
@@ -91,7 +90,6 @@ def create_app(config_class=Config):
     app.register_blueprint(main_bp)
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(post_bp, url_prefix='/posts')
-    app.register_blueprint(question_bp, url_prefix='/questions')
 
     @app.route('/index', methods=['GET'])
     def index():
