@@ -1,6 +1,7 @@
 from app.extensions import db, ma
 from datetime import datetime
 from marshmallow import Schema, fields, post_load
+from app.models.user import UserSchema
 
 # collect_book_table = db.Table(
 #     "collect_book",
@@ -36,10 +37,15 @@ class Collect(db.Model):
 
     # books = db.relationship("Book", secondary="collect_book")
 
+    author = db.relationship('User', backref='collects')
+
 class CollectShema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Collect
+        include_fk = True
 
     @post_load
     def make_review(self, data, **kwargs):
         return Collect(**data)
+
+    author = fields.Nested(UserSchema, only=("id", "name", "nickname", "state"))

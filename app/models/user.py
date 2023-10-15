@@ -25,6 +25,8 @@ class User(db.Model, UserMixin):
 
     # reviews = db.relationship('Review', back_populates='author')
 
+    # collects = db.relationship('Collect', back_populates='author')
+
     def encode_password(self, password):
         """将密码进行散列加密"""
         pwd = self.password_hash = generate_password_hash(password)

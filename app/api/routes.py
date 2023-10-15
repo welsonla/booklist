@@ -298,6 +298,29 @@ def collect_create():
     print(f"collect:${result}")
     return result(1000, '书单创建成功', collectDict)
 
+@bp.route('/collect/<int:id>', methods=['POST'])
+def collect_detail(id):
+    """获取书单详情"""
+    collect = Collect.query.get(id)
+    books = []
+    if collect is not None:
+        relations = CollectBooks.query.filter_by(collect_id=id).all()
+        print(f"relations:${len(relations)}")
+        for r in relations:
+            book = Book.query.filter_by(id=r.book_id).first()
+            print(f"book.name:${book.name}")
+            books.append(book)
+
+    collectShema = CollectShema()
+    dict = collectShema.dump(collect)
+
+    bookSchema = BookSchema(many=True)
+    list = bookSchema.dump(books)
+
+    dict["books"] = list
+    print(f"dict:${dict}")
+    print(f"books:${len(books)}")
+    return result(1000, '', dict)
 
 @bp.route('/logout', methods=['POST'])
 def logout():
