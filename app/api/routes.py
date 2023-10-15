@@ -10,7 +10,7 @@ from app.models.book import Book, BookSchema
 from app.models.note import Note, NoteSchema
 from app.models.quote import Quote, QuoteShema
 from app.models.review import Review, ReviewShema
-from app.models.collect import Collect, CollectShema
+from app.models.collect import Collect, CollectShema, CollectBooks
 from app.models.favorite import Favorite
 from app.functions import get_userid_by_sign
 from sqlalchemy.exc import SQLAlchemyError
@@ -200,7 +200,9 @@ def note_wechat_import():
     jsonData = request.get_json()
     content = jsonData.get('content')
     book_id = jsonData.get('book_id')
-    author_id = get_userid_by_sign(request.get_data('sign'))
+
+    sign = request.headers.get('sign')
+    author_id = get_userid_by_sign(sign)
     try:
         # 按章节拆分数据
         chapters = content.split("◆")
@@ -256,7 +258,6 @@ def review_ceate():
 def review_detail(id):
     """获取书评"""
     review = Review.query.get(id)
-    print(f"review:${review.author}")
     reviewShema = ReviewShema()
     dict = reviewShema.dump(review)
     return result(1000, '', dict)
@@ -264,22 +265,38 @@ def review_detail(id):
 
 @bp.route("/book/collect/create", methods=['POST'])
 def collect_create():
+    """创建书单"""
     # 获取请求中的json映射成实体
-    jsonData = request.get_json()
-    collectShema = CollectShema()
-    collect = collectShema.load(jsonData, many=False)
-    # 添加关联图书
-    books = jsonData.get("list")
-    for book in books:
-        bookShema = BookSchema()
-        bookItem = bookShema.load(book, many=False)
-        collect.books.append(bookItem)
+    sign = request.headers.get('sign')
+    print(f"sign:${sign}")
+    author_id = get_userid_by_sign(sign)
 
+    jsonData = request.get_json()
+
+    books = jsonData.get("list")
+    collectShema = CollectShema()
+    # collect = collectShema.load(jsonData, many=False)
+
+    collect = Collect()
+    collect.name = jsonData["name"]
+    collect.content = jsonData["content"]
+    collect.author_id = author_id
     db.session.add(collect)
     db.session.commit()
+
+    # 添加关联图书
+    for book in books:
+        bookItem = CollectBooks()
+        bookItem.book_id = book["id"]
+        bookItem.collect_id = collect.id
+        bookItem.content = book["title"]
+        db.session.add(bookItem)
+        db.session.commit()
+
     # 返回创建成功的书单
-    result = collectShema.dump(collect)
-    return result(1000, '书单创建成功', result)
+    collectDict = collectShema.dump(collect)
+    print(f"collect:${result}")
+    return result(1000, '书单创建成功', collectDict)
 
 
 @bp.route('/logout', methods=['POST'])
@@ -331,7 +348,8 @@ def full_text_search():
             "title": book["name"],
             "author": book["author"],
             "id": book["id"],
-            "content": book["desc"]
+            "content": book["desc"],
+            "image_url": book["image_url"]
         }
         sourceArray.append(hitDict)
         print(f"book.name:{book} --- {type(book)} --- {book.score} --- {book.rank} ")

@@ -50,6 +50,7 @@ def create_app(config_class=Config):
 
     # 创建搜索索引
     search.init_app(app)
+
     # with app.app_context():
     #     search.create_index(Book)
     #     search.create_index(Quote)

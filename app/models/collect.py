@@ -1,18 +1,26 @@
 from app.extensions import db, ma
 from datetime import datetime
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, post_load
 
-collect_book_table = db.Table(
-    "collect_book",
-    db.Column("collect_id", db.Integer, db.ForeignKey("collect.id"), primary_key=True),
-    db.Column("book_id", db.Integer, db.ForeignKey("book.id"), primary_key=True),
-    db.Column("content", db.Text, nullable=True, comment="图书评价"),
-    db.Column("created_at", db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="创建时间"),
-    db.Column("updated_at", db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="更新时间")
-)
+# collect_book_table = db.Table(
+#     "collect_book",
+#     db.Column("collect_id", db.Integer, db.ForeignKey("collect.id"), primary_key=True),
+#     db.Column("book_id", db.Integer, db.ForeignKey("book.id"), primary_key=True),
+#     db.Column("content", db.Text, nullable=True, comment="图书评价"),
+#     db.Column("created_at", db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="创建时间"),
+#     db.Column("updated_at", db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="更新时间")
+# )
+
+class CollectBooks(db.Model):
+    """书单与图书关联表"""
+    id = db.Column(db.Integer, primary_key=True)
+    collect_id = db.Column(db.Integer, comment="外键，书单Id")
+    book_id = db.Column(db.Integer, comment="外键，图书Id")
+    content = db.Column(db.Text, nullable=True, comment="图书评价")
+    created_at =  db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="创建时间")
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="更新时间")
 
 class Collect(db.Model):
-
     # 搜索字段
     __searchable__ = ['name', 'content']
 
@@ -31,3 +39,7 @@ class Collect(db.Model):
 class CollectShema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Collect
+
+    @post_load
+    def make_review(self, data, **kwargs):
+        return Collect(**data)

@@ -9,7 +9,7 @@ class Book(db.Model):
     __tablename__='book'
 
     # 搜索字段
-    __searchable__ = ['name', 'author', 'isbn', "desc"]
+    __searchable__ = ['name', 'author', 'isbn', "desc", "image_url"]
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), comment="书名")
