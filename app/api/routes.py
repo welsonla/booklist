@@ -83,6 +83,10 @@ def home():
     reviewShema = ReviewShema(many=True)
     reviewDict = reviewShema.dump(reviews)
 
+    collections = Collect.query.order_by(Collect.is_recommand.desc(), Collect.like_count.desc()).limit(10).all()
+    collectShema = CollectShema(many=True)
+    collectDict = collectShema.dump(collections)
+
     categories = db.session.query(Book.category, db.func.count(Book.category)).group_by(Book.category).all()
     categorie_dict = []
 
@@ -91,7 +95,7 @@ def home():
 
     params = {
         "hotbooks": bookDict,
-        "booklist": [],
+        "collections": collectDict,
         "notelist": noteDict,
         "reviews": reviewDict,
         "categories": categorie_dict
