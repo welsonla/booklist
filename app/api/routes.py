@@ -11,7 +11,7 @@ from app.models.note import Note, NoteSchema
 from app.models.quote import Quote, QuoteShema
 from app.models.review import Review, ReviewShema
 from app.models.collect import Collect, CollectShema, CollectBooks
-from app.models.favorite import Favorite
+from app.models.favorite import Favorite, FavoriteSchema
 from app.functions import get_userid_by_sign
 from sqlalchemy.exc import SQLAlchemyError
 import math
@@ -332,31 +332,79 @@ def logout():
 def comment():
     return ""
 
-
-@bp.route('/favoriate/add', methods=['POST'])
-def favorite_add():
-    """用户添加收藏"""
+@bp.route('/favorite/get', methods = ['POST'])
+def favorite_detail():
+    """获取用户收藏"""
+    # 获取请求中的json映射成实体
+    sign = request.headers.get('sign')
+    author_id = get_userid_by_sign(sign)
     jsonData = request.get_json()
     type_id = jsonData.get('type')
-    item_id = jsonData.get('item')
-    if checkContent(type_id, item_id) is not None:
+    item_id = jsonData.get('item_id')
+    print(f"type_id:${type_id} -- item_id:{item_id} -- author_id:${author_id}")
+    favorite = Favorite.query.filter_by(type=type_id, item_id=int(item_id), author_id=author_id).first()
+    if favorite is not None:
+        favoriteShema = FavoriteSchema()
+        dict = favoriteShema.dump(favorite)
+        return result(1000, '收藏添加成功', dict)
+    return result(1008, "收藏的内容不存在", None)
+
+@bp.route('/favorite/add', methods=['POST'])
+def favorite_add():
+    """用户添加收藏"""
+    # 获取请求中的json映射成实体
+    sign = request.headers.get('sign')
+    author_id = get_userid_by_sign(sign)
+    jsonData = request.get_json()
+    type_id = jsonData.get('type')
+    item_id = jsonData.get('item_id')
+    content =  checkContent(type_id, item_id)
+    if content is not None:
         favorite = Favorite()
         favorite.type = type_id
         favorite.item_id = item_id
+        favorite.author_id = author_id
         db.session.add(favorite)
+        # 更新收藏次数
+        if type_id == 2:
+            content.like_count = content.like_count + 1
         db.session.commit()
-        return result(1000, '收藏添加成功', [])
-    return result(1008, "收藏的内容不存在", [])
+        favoriteShema = FavoriteSchema()
+        dict = favoriteShema.dump(favorite)
+        return result(1000, '收藏添加成功', dict)
+    return result(1008, "收藏的内容不存在", None)
 
+@bp.route('/favorite/del', methods = ['POST'])
+def favorite_del():
+    """创建书单"""
+    # 获取请求中的json映射成实体
+    sign = request.headers.get('sign')
+    print(f"sign:${sign}")
+    author_id = get_userid_by_sign(sign)
+    jsonData = request.get_json()
+    favorite = Favorite.query.filter_by(type=jsonData["type"], item_id=jsonData["item_id"], author_id=author_id).first()
+    if favorite is not None:
+        db.session.delete(favorite)
+        db.session.commit()
+        return result(1000, '取消收藏成功', [])
+    return result(1020, '取消收藏失败', [])
 
 def checkContent(type_id, item_id):
     """检查收藏内容是否存在"""
-    if type_id == 'note':
-        return Quote.query.get(item_id)
-    elif type_id == 'book':
+    print(f"type:id${type_id} -- item_id:${item_id}")
+    if type_id == 1:
+        # 图书
         return Book.query.get(item_id)
-    elif type_id == 'collect':
+    elif type_id == 2:
+        # 书单
         return Collect.query.get(item_id)
+    elif type_id == 3:
+        # 书评
+        return Review.query.get(item_id)
+    elif type_id ==4:
+        # 笔记
+        return Quote.query.get(item_id)
+
 
 
 @bp.route('/search', methods=['POST'])

@@ -4,6 +4,7 @@ from app.extensions import db
 from app.models.user import User
 from app.models.review import Review
 from app.models.collect import Collect,CollectBooks
+from app.models.favorite import Favorite
 
 user_cli = AppGroup("user")
 
