@@ -27,6 +27,7 @@ class Collect(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), comment="书单名")
+    cover_url = db.Column(db.String(255), comment="封面图")
     author_id = db.Column(db.Integer, db.ForeignKey("user.id"),comment="外键, 作者Id")
     content = db.Column(db.Text, comment="书单简介")
     like_count = db.Column(db.Integer, default=0, comment="点赞数量")

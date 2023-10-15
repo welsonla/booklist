@@ -281,6 +281,7 @@ def collect_create():
     collect.name = jsonData["name"]
     collect.content = jsonData["content"]
     collect.author_id = author_id
+    collect.cover_url = books[0]["image_url"]
     db.session.add(collect)
     db.session.commit()
 
@@ -291,8 +292,8 @@ def collect_create():
         bookItem.collect_id = collect.id
         bookItem.content = book["title"]
         db.session.add(bookItem)
-        db.session.commit()
 
+    db.session.commit()
     # 返回创建成功的书单
     collectDict = collectShema.dump(collect)
     print(f"collect:${result}")
@@ -405,7 +406,15 @@ def checkContent(type_id, item_id):
         # 笔记
         return Quote.query.get(item_id)
 
-
+@bp.route('/collect/getList', methods=['POST'])
+def getMineCollect():
+    sign = request.headers.get('sign')
+    print(f"sign:${sign}")
+    author_id = get_userid_by_sign(sign)
+    collections = Collect.query.filter_by(author_id=author_id).all()
+    collectShema = CollectShema(many=True)
+    dict = collectShema.dump(collections)
+    return result(1000, '获取书单成功', dict)
 
 @bp.route('/search', methods=['POST'])
 def full_text_search():
