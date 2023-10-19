@@ -2,6 +2,7 @@ from app.extensions import db, date_style
 # from flask_sqlalchemy import Column,String,Integer,Text,Float,DateTime
 import datetime
 from marshmallow import Schema, fields
+from app.extensions import db, ma
 # from app.models.quote import QuoteShema
 
 class Book(db.Model):
@@ -26,6 +27,7 @@ class Book(db.Model):
     publish_date = db.Column(db.String(50), comment="出版日期")
     douban_url = db.Column(db.String(255), nullable=True, comment="豆瓣图书主页")
     category = db.Column(db.String(255), nullable=True, comment="图书种类")
+    like_count = db.Column(db.Integer, nullable=True, default=0, comment="收藏次数")
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
@@ -34,23 +36,10 @@ class Book(db.Model):
     # comments = db.relationship("Comment")
 
 
-class BookSchema(Schema):
-    id = fields.Int(dump_only=True)
-    name = fields.Str()
-    cover_url = fields.Str()
-    image_url = fields.Str()
-    author = fields.Str()
-    price = fields.Float()
-    desc = fields.Str()
-    isbn = fields.Str()
-    rating = fields.Float()
-    rating_count = fields.Int()
-    pages = fields.Int()
-    publisher = fields.Str()
-    publish_date = fields.Str()
-    douban_url = fields.Str()
-    category = fields.Str()
+class BookSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model=Book
+        include_fk = True
+
     created_at = fields.DateTime(date_style)
     updated_at = fields.DateTime(date_style)
-
-    # quotes = fields.Nested(QuoteShema, many=True)

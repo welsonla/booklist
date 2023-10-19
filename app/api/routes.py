@@ -16,6 +16,7 @@ from app.functions import get_userid_by_sign
 from sqlalchemy.exc import SQLAlchemyError
 import math
 import uuid
+from lxml.html import fromstring
 
 
 @bp.route('/login', methods=['POST'])
@@ -112,12 +113,16 @@ def book(id):
 
     # 查询关联笔记
     quotes = Quote.query.filter_by(book_id=book.id).limit(3).offset(0).all()
+    for q in quotes:
+        q.comment = fromstring(q.comment).text_content()
     quoteShema = QuoteShema(many=True)
     quoteDict = quoteShema.dump(quotes)
     bookDict["quotes"] = quoteDict
 
     ### 查询书评
     reviews = Review.query.filter_by(book_id=book.id).limit(3).offset(0).all()
+    for r in reviews:
+        r.content = fromstring(r.content).text_content()
     revieShema = ReviewShema(many=True)
     reviewDict = revieShema.dump(reviews)
     bookDict["reviews"] = reviewDict
@@ -154,7 +159,7 @@ def quote_create():
         dict = quoteSchema.dump(quote)
         return result(1000, '', dict)
     else:
-        print("未找到用户")
+        # print("未找到用户")
         return result(1003, '用户未登录')
 
 
@@ -272,7 +277,7 @@ def collect_create():
     """创建书单"""
     # 获取请求中的json映射成实体
     sign = request.headers.get('sign')
-    print(f"sign:${sign}")
+    # print(f"sign:${sign}")
     author_id = get_userid_by_sign(sign)
 
     jsonData = request.get_json()
@@ -300,7 +305,7 @@ def collect_create():
     db.session.commit()
     # 返回创建成功的书单
     collectDict = collectShema.dump(collect)
-    print(f"collect:${result}")
+    # print(f"collect:${result}")
     return result(1000, '书单创建成功', collectDict)
 
 @bp.route('/collect/<int:id>', methods=['POST'])
@@ -310,10 +315,10 @@ def collect_detail(id):
     books = []
     if collect is not None:
         relations = CollectBooks.query.filter_by(collect_id=id).all()
-        print(f"relations:${len(relations)}")
+        # print(f"relations:${len(relations)}")
         for r in relations:
             book = Book.query.filter_by(id=r.book_id).first()
-            print(f"book.name:${book.name}")
+            # print(f"book.name:${book.name}")
             books.append(book)
 
     collectShema = CollectShema()
@@ -323,8 +328,8 @@ def collect_detail(id):
     list = bookSchema.dump(books)
 
     dict["books"] = list
-    print(f"dict:${dict}")
-    print(f"books:${len(books)}")
+    # print(f"dict:${dict}")
+    # print(f"books:${len(books)}")
     return result(1000, '', dict)
 
 @bp.route('/logout', methods=['POST'])
@@ -346,7 +351,7 @@ def favorite_detail():
     jsonData = request.get_json()
     type_id = jsonData.get('type')
     item_id = jsonData.get('item_id')
-    print(f"type_id:${type_id} -- item_id:{item_id} -- author_id:${author_id}")
+    # print(f"type_id:${type_id} -- item_id:{item_id} -- author_id:${author_id}")
     favorite = Favorite.query.filter_by(type=type_id, item_id=int(item_id), author_id=author_id).first()
     if favorite is not None:
         favoriteShema = FavoriteSchema()
@@ -371,8 +376,14 @@ def favorite_add():
         favorite.author_id = author_id
         db.session.add(favorite)
         # 更新收藏次数
-        if type_id == 2:
+        if type_id == 1:
             content.like_count = content.like_count + 1
+        elif type_id == 2:
+            content.like_count = content.like_count + 1
+        elif type_id == 3:
+            content.like_count = content.like_count + 1
+        elif type_id == 4:
+            content.favorite_count = content.favorite_count + 1
         db.session.commit()
         favoriteShema = FavoriteSchema()
         dict = favoriteShema.dump(favorite)
@@ -384,19 +395,29 @@ def favorite_del():
     """创建书单"""
     # 获取请求中的json映射成实体
     sign = request.headers.get('sign')
-    print(f"sign:${sign}")
     author_id = get_userid_by_sign(sign)
     jsonData = request.get_json()
-    favorite = Favorite.query.filter_by(type=jsonData["type"], item_id=jsonData["item_id"], author_id=author_id).first()
+    type_id = jsonData.get('type')
+    item_id = jsonData.get('item_id')
+    favorite = Favorite.query.filter_by(type=type_id, item_id=item_id, author_id=author_id).first()
     if favorite is not None:
         db.session.delete(favorite)
+        content = checkContent(type_id, item_id)
+        if type_id == 1:
+            content.like_count = content.like_count - 1
+        elif type_id == 2:
+            content.like_count = content.like_count - 1
+        elif type_id == 3:
+            content.like_count = content.like_count - 1
+        elif type_id == 4:
+            content.favorite_count = content.favorite_count - 1
         db.session.commit()
         return result(1000, '取消收藏成功', [])
     return result(1020, '取消收藏失败', [])
 
 def checkContent(type_id, item_id):
     """检查收藏内容是否存在"""
-    print(f"type:id${type_id} -- item_id:${item_id}")
+    # print(f"type:id${type_id} -- item_id:${item_id}")
     if type_id == 1:
         # 图书
         return Book.query.get(item_id)
@@ -413,7 +434,7 @@ def checkContent(type_id, item_id):
 @bp.route('/collect/getList', methods=['POST'])
 def getMineCollect():
     sign = request.headers.get('sign')
-    print(f"sign:${sign}")
+    # print(f"sign:${sign}")
     author_id = get_userid_by_sign(sign)
     collections = Collect.query.filter_by(author_id=author_id).all()
     collectShema = CollectShema(many=True)
@@ -436,7 +457,7 @@ def full_text_search():
             "image_url": book["image_url"]
         }
         sourceArray.append(hitDict)
-        print(f"book.name:{book} --- {type(book)} --- {book.score} --- {book.rank} ")
+        # print(f"book.name:{book} --- {type(book)} --- {book.score} --- {book.rank} ")
     pagination = paginate(sourceArray, page=page, per_page=20)
     return result(1000, "", pagination)
 
