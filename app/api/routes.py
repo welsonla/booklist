@@ -60,12 +60,12 @@ def register():
         user = User()
         user.name = username
         user.role = 3
-        user.email = 'wyc.jar@gmail.com'
-        user.nickname = 'ssssyyyy'
-        user.password_hash = user.encode_password('111111')
+        user.email = params["email"]
+        user.nickname = username
+        user.password_hash = user.encode_password(params["password"])
         db.session.add(user)
         db.session.commit()
-    return f"{params['username']}"
+        return result(1000, '注册成功', {})
 
 
 @bp.route('/home', methods=["post"])
