@@ -9,11 +9,11 @@ from flask import render_template, request
 class UserView(AdminView):
     form_base_class = SecureForm
     page_size = 20
-    column_list = ["id", "name", "nickname", 'email', "created_at", "updated_at"]
+    column_list = ["id", "name", "nickname", 'email', 'role', "created_at", "updated_at"]
     column_exclude_list = ['password_hash']
     can_delete = False
     can_create = False
-    form_excluded_columns = ['password_hash']
+    form_excluded_columns = ['password_hash', 'reviews', 'collects']
 
     column_searchable_list = ["name", "nickname", "email"]
     column_default_sort = ("created_at", True)
@@ -23,7 +23,7 @@ class UserView(AdminView):
     form_overrides = dict(state=SelectField,role=SelectField)
     form_args = dict(
         state=dict(
-            choices=[(0, '正常'), (1, '下架')]
+            choices=[(0, '正常'), (1, '冻结')]
         ),
         role=dict(
             choices=[(0,'管理员'),(1,'普通用户')]
@@ -39,6 +39,12 @@ class UserView(AdminView):
         "state":"状态",
         "created_at": "创建时间",
         "updated_at": "更新时间",
+    }
+
+    column_formatters = {
+        'role': lambda v, c, m, p: '管理员' if m.role == 0 else '用户'
+
+        # 'is_recommand': lambda v, c, m, p: '未推荐' if m.is_recommand == 0 else '推荐'
     }
 
     def __init__(self, *args, **kwargs):

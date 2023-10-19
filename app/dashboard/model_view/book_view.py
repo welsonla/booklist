@@ -1,16 +1,20 @@
 from flask_admin.form import SecureForm
+from markupsafe import Markup
+
 from app.dashboard.model_view.admin_view import AdminView
 from wtforms.fields import SelectField
 from flask import render_template, request,flash, redirect
 from app.models.book import Book
 from app.extensions import db
 class BookView(AdminView):
+    def _cover_image(self, context, model, name):
+        return Markup('<img src="%s" style="width:100px;height:150px;"'%(model.image_url))
 
     form_base_class = SecureForm
     # 定义分页数量
     page_size = 15
     # 定义查询列表
-    column_list = ["id","name",  "author", 'category', "created_at", "updated_at"] #"cover_url",
+    column_list = ["id","image_url", "name",  "author", 'category', "created_at", "updated_at"] #"cover_url",
     column_searchable_list = ["name", "author"]
     column_default_sort = ("created_at", True)
     column_filters = ["name"]
@@ -22,6 +26,10 @@ class BookView(AdminView):
             choices=[(0, '正常'), (1, '下架')]
         )
     )
+
+    column_formatters = {
+        'image_url': _cover_image
+    }
 
     # 自定义列显示
     column_labels = {

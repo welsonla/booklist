@@ -2,6 +2,7 @@ from flask_admin import expose
 from flask_admin.form import SecureForm
 from flask_admin.helpers import get_redirect_target
 from flask_admin.model.template import EndpointLinkRowAction
+from markupsafe import Markup
 
 from app.dashboard.model_view.admin_view import AdminView
 from wtforms.fields import SelectField
@@ -23,9 +24,21 @@ class QuoteView(AdminView):
     # column_filters = ["name"]
 
     column_searchable_list = ["content", "comment", "chapter"]
+    form_excluded_columns = ['book','user']
+
+    form_overrides = dict(is_recommand=SelectField)
+    form_args = dict(
+        is_recommand=dict(
+            choices=[(0, '未推荐'), (1, '推荐')]
+        )
+    )
 
     column_formatters = {
-        'is_recommand': lambda v, c, m, p: '未推荐' if m.is_recommand == 0 else '推荐'
+        'is_recommand': lambda v, c, m, p: Markup(
+            "<span class='fa fa-heart glyphicon glyphicon-trash'></span>") if m.is_recommand == 0 else Markup(
+            "<span class='fa fa-heart glyphicon glyphicon-trash' style='color:red;'></span>")
+
+        # 'is_recommand': lambda v, c, m, p: '未推荐' if m.is_recommand == 0 else '推荐'
     }
 
     column_widths = {
