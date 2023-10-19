@@ -83,7 +83,7 @@ def home():
     reviewShema = ReviewShema(many=True)
     reviewDict = reviewShema.dump(reviews)
 
-    collections = Collect.query.order_by(Collect.is_recommand.desc(), Collect.like_count.desc()).limit(10).all()
+    collections = Collect.query.order_by(Collect.is_recommand.desc(), Collect.like_count.desc()).limit(8).all()
     collectShema = CollectShema(many=True)
     collectDict = collectShema.dump(collections)
 
