@@ -82,7 +82,10 @@ def home():
     noteSchema = NoteSchema(many=True)
     noteDict = noteSchema.dump(notes)
 
-    reviews = Review.query.order_by(Review.id.desc()).limit(5).offset(0).all()
+    reviews = Review.query.order_by(Review.like_count.desc(), Review.id.desc()).limit(5).offset(0).all()
+    for r in reviews:
+        if r.content is not None:
+            r.content = fromstring(r.content).text_content()
     reviewShema = ReviewShema(many=True)
     reviewDict = reviewShema.dump(reviews)
 
@@ -185,10 +188,15 @@ def user(id):
         dict["notes"] = noteArray
 
         # 加载书单
-        # collects = Collect.query.filter_by(author_id=id).limit(5).all()
-        # collectShema = CollectShema(many=True)
-        # collectArray = collectShema.dump(collects)
+        collects = Collect.query.filter_by(author_id=id).limit(5).all()
+        collectShema = CollectShema(many=True)
+        collectArray = collectShema.dump(collects)
+        dict["collects"] = collectArray
+
+        # 加载书评
         reviews = Review.query.filter_by(author_id=id).limit(5).all()
+        for r in reviews:
+            r.content = fromstring(r.content).text_content()
         reviewShema = ReviewShema(many=True)
         reviewArray = reviewShema.dump(reviews)
         dict["reviews"] = reviewArray

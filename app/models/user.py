@@ -18,8 +18,8 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(50), comment="邮箱")
     role = db.Column(db.Integer, comment="用户角色")
     state = db.Column(db.Integer, default=0, comment="0:正常，1:冻结")
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def encode_password(self, password):
         """将密码进行散列加密"""

@@ -1,5 +1,6 @@
 import logging
 import os
+import pytz
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # https://www.digitalocean.com/community/tutorials/how-to-structure-a-large-flask-application-with-flask-blueprints-and-flask-sqlalchemy
@@ -8,6 +9,8 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'hard to guess pass'
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'booklist.sqlite')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    MySQL_DATABASE_URI = 'mysql:///root@127.0.0.1:xxcc&*:booklist'
 
     # 搜索
     # flask-msearch will use table name as elasticsearch index name unless set __msearch_index__
@@ -21,6 +24,8 @@ class Config:
     #AdminLTE
     FLASK_ADMIN_SWATCH = 'cerulean'
     BABEL_DEFAULT_LOCALE = 'zh_CN'
+
+    TIMEZONE = 'Asia/Shanghai'
 
 LANGUAGES = {
     "zh_CN":"中文",
