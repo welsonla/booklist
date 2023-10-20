@@ -1,5 +1,7 @@
 import re
 
+from sqlalchemy import func
+
 from app.api import bp
 from flask import Flask, jsonify, request
 from app.extensions import db
@@ -72,7 +74,7 @@ def register():
 @bp.route('/home', methods=["post"])
 def home():
     """获取首页数据"""
-    hotbooks = Book.query.order_by(Book.rating.desc()).limit(5).all()
+    hotbooks = Book.query.order_by(Book.like_count.desc(),Book.rating.desc()).limit(6).all()
     bookSchema = BookSchema(many=True)
     bookDict = bookSchema.dump(hotbooks)
 
@@ -114,7 +116,8 @@ def book(id):
     # 查询关联笔记
     quotes = Quote.query.filter_by(book_id=book.id).limit(3).offset(0).all()
     for q in quotes:
-        q.comment = fromstring(q.comment).text_content()
+        if q.comment is not None:
+            q.comment = fromstring(q.comment).text_content()
     quoteShema = QuoteShema(many=True)
     quoteDict = quoteShema.dump(quotes)
     bookDict["quotes"] = quoteDict
@@ -122,7 +125,8 @@ def book(id):
     ### 查询书评
     reviews = Review.query.filter_by(book_id=book.id).limit(3).offset(0).all()
     for r in reviews:
-        r.content = fromstring(r.content).text_content()
+        if r.content is not None:
+            r.content = fromstring(r.content).text_content()
     revieShema = ReviewShema(many=True)
     reviewDict = revieShema.dump(reviews)
     bookDict["reviews"] = reviewDict
@@ -171,15 +175,13 @@ def user(id):
         dict = userShema.dump(user)
 
         # 加载收藏
-        # favorites = Favorite.query.filter_by(user_id=id).limit(5).all
-        # favoriteShema = FavoriteShema(many=True)
-        # favoriteArray = favoriteShema.dump(favorites)
-        # dict["favoriteArray"] = favoriteArray
+        favorite_count = Favorite.query.filter_by(author_id=id).count()
+        dict["favorite_count"] = favorite_count
 
         # 加载用户笔记
-        notes = Quote.query.filter_by(user_id=id).limit(5).all()
+        quotePage = Quote.query.filter_by(user_id=id).paginate(page=1, per_page=5)
         noteShema = QuoteShema(many=True)
-        noteArray = noteShema.dump(notes)
+        noteArray = noteShema.dump(quotePage.items)
         dict["notes"] = noteArray
 
         # 加载书单
@@ -194,6 +196,32 @@ def user(id):
         return result(1000, '', dict)
     return result(1005, '用户信息不存在', [])
 
+@bp.route('/book/note/list', methods=['POST'])
+def quote_list():
+    """笔记列表"""
+    jsonData = request.get_json()
+    book_id = jsonData['bookid']
+    user_id = jsonData['userid']
+    page = jsonData["p"]
+    print(f"bookid:${book_id} -- user_id:${user_id} --- ${page}")
+    pageInfo = Quote.query.filter(Quote.book_id == book_id,Quote.user_id == user_id, Quote.content.isnot(None)).paginate(page=int(page), per_page=10)
+    total = pageInfo.pages
+    listArray = pageInfo.items
+
+    user = User.query.filter_by(id=user_id).first()
+    userShema = UserSchema()
+    userDict = userShema.dump(user)
+
+    shema = QuoteShema(many=True)
+    dict = {}
+    dict["total"] = total
+    dict["page"] = page
+    dict["total_items"] = pageInfo.total
+    dict["list"] = shema.dump(listArray)
+    dict["user"] = userDict
+
+
+    return result(1000, '', dict)
 
 @bp.route('/book/quote/<int:id>', methods=['POST'])
 def quote_detail(id):
@@ -422,6 +450,55 @@ def favorite_del():
         return result(1000, '取消收藏成功', [])
     return result(1020, '取消收藏失败', [])
 
+@bp.route('/favorite/list', methods=['POST'])
+def favorite_list():
+    sign = request.headers.get('sign')
+    author_id = get_userid_by_sign(sign)
+    jsonData = request.get_json()
+    type_id = jsonData.get('type_id')
+
+    list_result = db.session.query(Favorite.type, func.count(Favorite.type).label('c')).filter(Favorite.author_id == author_id).group_by(Favorite.type).all()
+
+    count_dict = []
+    print(f"list_result:{list_result}")
+    for item in list_result:
+        count_dict.append({'type': item[0], 'count': item[1] })
+
+    result_dict = {}
+    item_array = []
+    favorite_list = Favorite.query.with_entities(Favorite.item_id).filter_by(author_id=author_id, type=type_id).all()
+    for fav in favorite_list:
+        item_array.append(fav.item_id)
+    print(f"favorite_list:{item_array}")
+    if type_id == 1:
+        books = Book.query.filter(Book.id.in_(item_array)).all()
+        shema = BookSchema(many=True)
+        dict = shema.dump(books)
+        result_dict["list"] = dict
+    elif type_id == 2:
+        collects = Collect.query.filter(Collect.id.in_(item_array)).all()
+        shema = CollectShema(many=True)
+        dict = shema.dump(collects)
+        result_dict["list"] = dict
+    elif type_id == 3:
+        reviews = Review.query.filter(Review.id.in_(item_array)).all()
+        for r in reviews:
+            r.content = fromstring(r.content).text_content()
+        shema = ReviewShema(many=True)
+        dict = shema.dump(reviews)
+        result_dict["list"] = dict
+    elif type_id == 4:
+        notes = Quote.query.filter(Quote.id.in_(item_array)).all()
+        # for r in notes:
+        #     if r.comment is not None:
+        #         r.comment = fromstring(r.comment).text_content()
+        shema = ReviewShema(many=True)
+        dict = shema.dump(notes)
+        # print(f"dict:{dict}")
+        result_dict["list"] = dict
+
+    result_dict["counts"] = count_dict
+    return result(1000, '', result_dict)
 def checkContent(type_id, item_id):
     """检查收藏内容是否存在"""
     # print(f"type:id${type_id} -- item_id:${item_id}")

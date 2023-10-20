@@ -4,9 +4,9 @@ from marshmallow import Schema, fields
 from app.models.user import User, UserSchema
 from app.models.book import BookSchema
 
+
 class Quote(db.Model):
     """图书摘录"""
-
     # 搜索字段
     __searchable__ = ['chapter', 'content', 'comment']
 
@@ -24,8 +24,8 @@ class Quote(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     #  关联User
-    user = db.relationship('User')
-    book = db.relationship('Book', backref=db.backref("quotes", lazy='select')) # backref=db.backref("quotes", lazy="dynamic")
+    author = db.relationship('User', backref='quotes')
+    book = db.relationship('Book', backref='quotes')
 
 class QuoteShema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -36,5 +36,5 @@ class QuoteShema(ma.SQLAlchemyAutoSchema):
     updated_at = fields.DateTime(('%Y-%m-%d %H:%M:%S'))
 
     # 过滤字段
-    user = fields.Nested(UserSchema, only=("id", "name", "nickname", "state"))
+    author = fields.Nested(UserSchema, only=("id", "name", "nickname", "state"))
     book = fields.Nested(BookSchema, only=("id", "name", "cover_url", "author"))
