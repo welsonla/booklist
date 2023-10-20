@@ -208,24 +208,29 @@ def note_wechat_import():
     """导入微信读书笔记"""
     jsonData = request.get_json()
     content = jsonData.get('content')
-    book_id = jsonData.get('book_id')
+    book_id = jsonData.get('bookid')
 
     sign = request.headers.get('sign')
     author_id = get_userid_by_sign(sign)
+    print(f"图书id:${book_id} --- 作者Id:${author_id}")
     try:
         # 按章节拆分数据
         chapters = content.split("◆")
+        print(f"章节条数:${len(chapters)}")
         for chapter in chapters:
             # 拆分标注条目
             noteArray = chapter.split("\n")
             # 第一行数据为章节名称
             chapter_name = noteArray[0].replace("◆", "")
+            print(f"章节名:${chapter_name}")
             # 解析标注条目
             for note in noteArray[1:]:
                 # 检查标注中是否包含个人笔记
                 lines = note.splitlines()
-                note = parse_note(lines, chapter_name, book_id, author_id)
-                db.session.add(note)
+                print(f"笔记条数:${len(lines)}")
+                if len(lines) > 0:
+                    note = parse_note(lines, chapter_name, book_id, author_id, 1)
+                    db.session.add(note)
             # 保存变更
         db.session.commit()
     except SQLAlchemyError as e:
@@ -233,17 +238,19 @@ def note_wechat_import():
     return result(1000, '导入成功', [])
 
 
-def parse_note(lines, chapter_name, book_id, author_id):
+def parse_note(lines, chapter_name, book_id, author_id, source):
+    print(f"lines:${lines} --- 章节:${chapter_name} --- 图书Id:${book_id} --- 作者Id:${author_id}")
     quote = Quote()
     for line in lines:
         quote.chapter = chapter_name
         quote.book_id = book_id
-        quote.author_id = author_id
+        quote.user_id = author_id
+        quote.source = source
         if re.match(r"\d{4}/\d{1,2}/\d{1,2}", line):
             continue
-        elif line.startwith(">>"):
+        elif line.startswith(">>"):
             # 标注内容
-            quote.content = line.replace(">>")
+            quote.content = line.replace(">>", "")
         else:
             # 个人笔记
             quote.comment = line

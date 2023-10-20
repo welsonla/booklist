@@ -20,6 +20,7 @@ class Quote(db.Model):
     is_recommand = db.Column(db.Integer, nullable=False, default=0, comment="推荐状态")
     favorite_count = db.Column(db.Integer, nullable=True, default=0, comment="收藏数量")
     state = db.Column(db.Integer, default=1, comment='0删除,1正常')
+    source = db.Column(db.Integer, default=0, comment="数据来源,0 手动录入 1 微信 2 kindle")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     #  关联User
