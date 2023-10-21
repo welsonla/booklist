@@ -8,3 +8,8 @@ def get_userid_by_sign(sign):
     if token is not None:
         return token.userid
     return ""
+
+def remove_lines_from_string(text, num_lines):
+    lines = text.split('\n')
+    new_lines = lines[num_lines:]
+    return '\n'.join(new_lines)

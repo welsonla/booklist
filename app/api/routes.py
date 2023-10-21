@@ -14,7 +14,7 @@ from app.models.quote import Quote, QuoteShema
 from app.models.review import Review, ReviewShema
 from app.models.collect import Collect, CollectShema, CollectBooks
 from app.models.favorite import Favorite, FavoriteSchema
-from app.functions import get_userid_by_sign
+from app.functions import get_userid_by_sign, remove_lines_from_string
 from sqlalchemy.exc import SQLAlchemyError
 import math
 import uuid
@@ -249,6 +249,7 @@ def note_wechat_import():
     sign = request.headers.get('sign')
     author_id = get_userid_by_sign(sign)
     print(f"图书id:${book_id} --- 作者Id:${author_id}")
+    content = remove_lines_from_string(content, 3)
     try:
         # 按章节拆分数据
         chapters = content.split("◆")
@@ -272,6 +273,42 @@ def note_wechat_import():
     except SQLAlchemyError as e:
         return result(1010, '数据库操作失败')
     return result(1000, '导入成功', [])
+
+@bp.route('/book/note/kindle/import', methods=['POST'])
+def note_kindle_import():
+    """导入微信读书笔记"""
+    jsonData = request.get_json()
+    content = jsonData.get('content')
+    book_id = jsonData.get('bookid')
+
+    sign = request.headers.get('sign')
+    author_id = get_userid_by_sign(sign)
+    print(f"图书id:${book_id} --- 作者Id:${author_id}")
+    content = remove_lines_from_string(content, 3)
+    try:
+        # 按章节拆分数据
+        chapters = content.split("◆")
+        print(f"章节条数:${len(chapters)}")
+        for chapter in chapters:
+            # 拆分标注条目
+            noteArray = chapter.split("\n")
+            # 第一行数据为章节名称
+            chapter_name = noteArray[0].replace("◆", "")
+            print(f"章节名:${chapter_name}")
+            # 解析标注条目
+            for note in noteArray[1:]:
+                # 检查标注中是否包含个人笔记
+                lines = note.splitlines()
+                print(f"笔记条数:${len(lines)}")
+                if len(lines) > 0:
+                    note = parse_note(lines, chapter_name, book_id, author_id, 2)
+                    db.session.add(note)
+            # 保存变更
+        db.session.commit()
+    except SQLAlchemyError as e:
+        return result(1010, '数据库操作失败')
+    return result(1000, '导入成功', [])
+
 
 
 def parse_note(lines, chapter_name, book_id, author_id, source):
@@ -299,7 +336,15 @@ def review_ceate():
     jsonBody = request.get_json()
     reviewShema = ReviewShema()
     data = reviewShema.load(jsonBody, many=False)
-    data.author_id = 1
+
+    jsonData = request.get_json()
+    content = jsonData.get('content')
+    book_id = jsonData.get('bookid')
+
+    sign = request.headers.get('sign')
+    author_id = get_userid_by_sign(sign)
+
+    data.author_id = author_id
     db.session.add(data)
     db.session.commit()
     dict = reviewShema.dump(data)
@@ -553,6 +598,79 @@ def full_text_search():
     pagination = paginate(sourceArray, page=page, per_page=20)
     return result(1000, "", pagination)
 
+@bp.route('/tag', methods=['POST'])
+def tag():
+    """笔记列表"""
+    jsonData = request.get_json()
+    tag = jsonData['name']
+    page = jsonData['p'] or 1
+    print(f"tag:{tag} ---p:{page}")
+    pageInfo = Book.query.filter_by(category = tag).paginate(page=int(page), per_page=10)
+    total = pageInfo.pages
+    listArray = pageInfo.items
+
+    shema = BookSchema(many=True)
+    dict = {}
+    dict["total"] = total
+    dict["page"] = page
+    dict["total_items"] = pageInfo.total
+    dict["list"] = shema.dump(listArray)
+
+    return result(1000, '', dict)
+
+@bp.route('/reviews', methods=['POST'])
+def reviews():
+    jsonData = request.get_json()
+    bookid = jsonData.get('bookid') or 0
+    page = jsonData["p"]
+    user_id = jsonData['userid'] or 0
+
+    pageInfo = Review.query.filter_by(book_id=bookid).paginate(per_page=10, page=1)
+    if int(user_id) > 0:
+        pageInfo = Review.query.filter_by(book_id=bookid, author_id=user_id).paginate(per_page=10, page=1)
+    elif int(bookid) == 0:
+        pageInfo = Review.query.filter_by(author_id=user_id).paginate(per_page=10, page=1)
+    total = pageInfo.pages
+    listArray = pageInfo.items
+    for item in listArray:
+        item.content = fromstring(item.content).text_content()
+
+    shema = ReviewShema(many=True)
+    dict = {}
+    dict["total"] = total
+    dict["page"] = page
+    dict["total_items"] = pageInfo.total
+    dict["list"] = shema.dump(listArray)
+
+    return result(1000, '', dict)
+
+@bp.route('/notes', methods=['POST'])
+def notes():
+    jsonData = request.get_json()
+    bookid = jsonData.get('bookid') or 0
+    page = jsonData["p"]
+    user_id = jsonData['userid'] or 0
+    pageInfo = {}
+    if int(bookid) > 0:
+        if int(user_id) > 0:
+            pageInfo = Quote.query.filter_by(book_id=bookid, user_id=user_id).paginate(per_page=10, page=1)
+        else:
+            pageInfo = Quote.query.filter_by(book_id=bookid).paginate(per_page=10, page=1)
+    else:
+        pageInfo = Quote.query.filter_by(user_id=user_id).paginate(per_page=10, page=1)
+    total = pageInfo.pages
+    listArray = pageInfo.items
+    for item in listArray:
+        item.content = fromstring(item.content).text_content()
+
+    shema = QuoteShema(many=True)
+    dict = {}
+    dict["total"] = total
+    dict["page"] = page
+    dict["total_items"] = pageInfo.total
+    dict["list"] = shema.dump(listArray)
+
+    return result(1000, '', dict)
 
 def paginate(dataArray=[], page=1, per_page=20):
     # 总页数
